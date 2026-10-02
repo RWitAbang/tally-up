@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Add Account — Tally Up</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="card">
+    <h1>Add an Account</h1>
+    <div id="form-section">
+      <form id="setup-form">
+        <label for="bank_name">Bank Name</label>
+        <input type="text" id="bank_name" name="bank_name" required />
+
+        <label for="account_type">Account Type</label>
+        <select id="account_type" name="account_type">
+          <option value="savings">Savings</option>
+          <option value="current">Current</option>
+          <option value="domiciliary">Domiciliary</option>
+        </select>
+
+        <label for="currency">Currency</label>
+        <select id="currency" name="currency">
+          <option value="NGN">Naira (₦)</option>
+          <option value="USD">Dollar ($)</option>
+        </select>
+
+        <label for="category">Personal or Business</label>
+        <select id="category" name="category">
+          <option value="personal">Personal</option>
+          <option value="business">Business</option>
+        </select>
+
+        <label for="starting_balance">Starting Balance</label>
+        <input type="number" id="starting_balance" name="starting_balance" step="0.01" placeholder="0" />
+
+        <button type="submit">Save Account</button>
+        <p class="error" id="error"></p>
+      </form>
+    </div>
+    <div id="confirm-section" hidden>
+      <p>Account added!</p>
+      <button id="add-another">Add another account</button>
+      <button id="done">Done — go to Dashboard</button>
+    </div>
+  </div>
+  <script type="module" src="js/setup.js"></script>
+</body>
+</html>

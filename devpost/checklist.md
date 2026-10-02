@@ -19,7 +19,7 @@ Build mode: learn
   Learner check: On your phone, open the Netlify link, sign in, and see the proof message appear.
   Commit: `Set up Supabase, auth, and deployment; prove the connection end to end`
 
-- [ ] **2. Add your real accounts and see them listed**
+- [x] **2. Add your real accounts and see them listed**
   Becomes usable: You can add accounts one at a time (looping until you decline) and see them listed on a dashboard.
   Why now: Multi-account, multi-currency, personal/business handling is the unique kernel of this app — it needs to exist before any transaction can reference an account.
   PRD ref: `prd.md > Account Setup`, `prd.md > Screens and Layout > Account Setup`, `prd.md > Every later visit`

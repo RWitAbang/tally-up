@@ -39,7 +39,7 @@ label {
   font-weight: 600;
 }
 
-input {
+input, select {
   width: 100%;
   padding: 10px 12px;
   margin-top: 6px;
@@ -47,6 +47,23 @@ input {
   border-radius: 10px;
   font-family: inherit;
   font-size: 1rem;
+  background: white;
+}
+
+.account-row {
+  padding: 14px;
+  margin-top: 12px;
+  border-radius: 10px;
+  background: #fdfaf6;
+  border: 2px solid #e5ded5;
+}
+
+#confirm-section button {
+  background: var(--sage);
+}
+
+#confirm-section button:first-of-type {
+  background: var(--sky);
 }
 
 button {
