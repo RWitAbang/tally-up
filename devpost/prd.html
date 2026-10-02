@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tally Up — Product Requirements</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink: #B8336A;
+    --orange: #F2AF29;
+    --green: #70B77E;
+    --blue: #05B2DC;
+    --slate: #37505C;
+    --bg: #FBF8F4;
+    --card: #FFFFFF;
+    --ink: #2A2F33;
+    --ink-soft: #5B6670;
+    --border: #E8E2D8;
+    --radius: 18px;
+    --shadow: 0 4px 18px rgba(55, 80, 92, 0.08);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+    line-height: 1.55;
+    padding-bottom: 80px;
+  }
+  h1, h2, h3, .display {
+    font-family: 'Baloo 2', system-ui, -apple-system, sans-serif;
+    font-weight: 700;
+  }
+  header {
+    padding: 56px 24px 40px;
+    text-align: center;
+    background: linear-gradient(135deg, var(--pink) 0%, var(--orange) 55%, var(--green) 100%);
+    color: white;
+  }
+  header h1 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    margin: 0 0 10px;
+    letter-spacing: -0.02em;
+  }
+  header p {
+    max-width: 640px;
+    margin: 0 auto;
+    font-size: 1.1rem;
+    opacity: 0.96;
+  }
+  .status-pill {
+    display: inline-block;
+    margin-top: 18px;
+    padding: 6px 16px;
+    background: rgba(255,255,255,0.22);
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  main {
+    max-width: 880px;
+    margin: -28px auto 0;
+    padding: 0 20px;
+  }
+  section.card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    padding: 32px 28px;
+    margin-bottom: 24px;
+  }
+  section.card h2 {
+    font-size: 1.5rem;
+    margin: 0 0 6px;
+    color: var(--slate);
+  }
+  .section-sub {
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+    margin: 0 0 22px;
+  }
+  .source-tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--slate);
+    background: #EAF3EC;
+    padding: 3px 10px;
+    border-radius: 999px;
+    margin-bottom: 14px;
+  }
+
+  /* Journey diagram */
+  .journey-wrap { overflow-x: auto; padding: 8px 0 4px; }
+  .journey {
+    display: flex;
+    gap: 0;
+    min-width: 760px;
+  }
+  .journey-step {
+    flex: 1;
+    position: relative;
+    padding: 18px 14px 16px;
+    cursor: pointer;
+    border-radius: 14px;
+    transition: background 0.15s ease, transform 0.15s ease;
+    text-align: center;
+  }
+  .journey-step:hover { background: #F6F1E9; transform: translateY(-2px); }
+  .journey-step.active { background: #FFF4E2; box-shadow: inset 0 0 0 2px var(--orange); }
+  .journey-step .num {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--slate);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 700;
+    margin: 0 auto 8px;
+    font-size: 0.95rem;
+  }
+  .journey-step.active .num { background: var(--orange); }
+  .journey-step .label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--slate);
+  }
+  .journey-arrow {
+    align-self: center;
+    color: var(--border);
+    font-size: 1.3rem;
+    padding-top: 10px;
+  }
+  .journey-detail {
+    margin-top: 18px;
+    padding: 18px 20px;
+    background: #F6F1E9;
+    border-radius: 12px;
+    border-left: 4px solid var(--orange);
+    font-size: 0.98rem;
+  }
+
+  /* Accordion */
+  .accordion-item {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .accordion-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 18px;
+    cursor: pointer;
+    background: #FAFAF8;
+    user-select: none;
+  }
+  .accordion-head:hover { background: #F3EFE6; }
+  .accordion-dot {
+    width: 12px; height: 12px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .accordion-head h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    flex: 1;
+    color: var(--ink);
+  }
+  .chev { transition: transform 0.2s ease; color: var(--ink-soft); font-size: 0.85rem; }
+  .accordion-item.open .chev { transform: rotate(90deg); }
+  .accordion-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease;
+    padding: 0 18px;
+  }
+  .accordion-item.open .accordion-body {
+    padding: 4px 18px 20px;
+  }
+  .accordion-body h4 {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+    margin: 16px 0 8px;
+  }
+  .accordion-body h4:first-child { margin-top: 4px; }
+  .accordion-body ul { margin: 0; padding-left: 20px; }
+  .accordion-body li { margin-bottom: 5px; }
+  .crit {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin-bottom: 7px;
+    font-size: 0.95rem;
+  }
+  .crit::before {
+    content: "✓";
+    color: var(--green);
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  /* Palette */
+  .palette { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+  .swatch {
+    width: 90px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+  .swatch-color { height: 60px; }
+  .swatch-code {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 6px 4px;
+    background: white;
+    color: var(--ink-soft);
+  }
+  .look-feel-note {
+    background: #F6F1E9;
+    border-radius: 12px;
+    padding: 16px 18px;
+    font-size: 0.95rem;
+    margin-top: 10px;
+  }
+
+  /* States grid */
+  .states-grid { display: grid; gap: 12px; }
+  .state-row {
+    display: flex;
+    gap: 14px;
+    padding: 14px 16px;
+    background: #FAFAF8;
+    border-radius: 12px;
+    border-left: 4px solid var(--blue);
+  }
+  .state-row strong { color: var(--slate); white-space: nowrap; }
+
+  /* Decisions */
+  .decision {
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: #FDF1F6;
+    border-left: 4px solid var(--pink);
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+  }
+  .decision .why { color: var(--ink-soft); font-size: 0.88rem; }
+
+  /* Now/Deferred */
+  .split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 640px) { .split-grid { grid-template-columns: 1fr; } }
+  .split-col h3 { font-size: 1rem; margin: 0 0 10px; }
+  .split-col.now h3 { color: var(--green); }
+  .split-col.later h3 { color: var(--slate); }
+  .split-col ul { margin: 0; padding-left: 20px; font-size: 0.93rem; }
+  .split-col li { margin-bottom: 8px; }
+
+  .feedback {
+    background: linear-gradient(135deg, #FFF8EE, #FDF1E8);
+    border: 1px solid #F3DFB8;
+    border-radius: var(--radius);
+    padding: 26px 28px;
+    margin-bottom: 24px;
+  }
+  .feedback h2 { color: var(--slate); font-size: 1.2rem; margin-top: 0; }
+
+  footer {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 0.85rem;
+    padding: 24px;
+  }
+  .offline-note {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    text-align: center;
+    margin-top: -8px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="status-pill">PRD · Draft for Review</div>
+  <h1>Tally Up</h1>
+  <p>A phone-first expense tracker across every personal and business bank account you have — Naira and Dollar — so logging a transaction takes seconds and your dashboard always matches reality.</p>
+</header>
+
+<main>
+
+  <section class="card">
+    <h2>The Core Journey</h2>
+    <p class="section-sub">Click a step to see what happens.</p>
+    <div class="journey-wrap">
+      <div class="journey" id="journey"></div>
+    </div>
+    <div class="journey-detail" id="journey-detail"></div>
+  </section>
+
+  <section class="card">
+    <h2>Screens &amp; Behavior</h2>
+    <p class="section-sub">Each surface — what's on it, what can go wrong, and how you'd know it's working.</p>
+    <div id="accordion"></div>
+  </section>
+
+  <section class="card">
+    <h2>Look &amp; Feel</h2>
+    <p class="section-sub">Minimal and clean, but colorful and playful — your palette, your call on fonts and icons being anything but generic.</p>
+    <div class="palette" id="palette"></div>
+    <div class="look-feel-note">
+      Typography and icons: playful and friendly — explicitly <em>not</em> default system fonts like Arial or Times New Roman, and not generic/boring icon sets. <code>4-spec</code> will pick the actual typeface and icon library against this palette.
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>States &amp; Boundaries</h2>
+    <div class="states-grid" id="states"></div>
+  </section>
+
+  <section class="card">
+    <h2>Product Decisions</h2>
+    <p class="section-sub">Choices made during this interview, and why.</p>
+    <div id="decisions"></div>
+  </section>
+
+  <section class="card">
+    <h2>What's In vs. What's Later</h2>
+    <div class="split-grid">
+      <div class="split-col now">
+        <h3>✅ Building now</h3>
+        <ul id="building-now"></ul>
+      </div>
+      <div class="split-col later">
+        <h3>⏭ Deferred</h3>
+        <ul id="deferred"></ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="feedback">
+    <h2>How this expands on your scope</h2>
+    <p>Your scope said "users can log a transaction." Now we know exactly what that means: one account at a time during setup so a 2-account person isn't slowed by a 9-account form, a dashboard that splits totals by currency <em>and</em> by personal/business without turning into a wall of numbers, and a tap-to-edit/delete flow because you were clear that UX has to be obvious, not clever.</p>
+    <p>The journey is complete end to end — setup, dashboard, logging, viewing, correcting mistakes — and every behavior has a concrete, checkable "you'd know it worked" criterion. The now/deferred split matches your scope's boundary exactly: nothing has grown. One open item is flagged below and it's non-blocking.</p>
+  </div>
+
+  <section class="card">
+    <h2>Open Questions</h2>
+    <div class="state-row" style="border-left-color: var(--orange);">
+      <span>❓</span>
+      <span>Whether an account's own details (name, type, starting balance) can be edited later, separate from editing individual transactions. Not raised in this interview — non-blocking, defaults to "not editable in this PoC" unless it comes up in <code>4-spec</code>.</span>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Tally Up — PRD companion · Canonical document: <code>devpost/prd.md</code>
+  <div class="offline-note">Works fully offline — no external data required, diagram and interactions are self-contained.</div>
+</footer>
+
+<script>
+const journeySteps = [
+  {
+    label: "First open",
+    detail: "<strong>Zero accounts.</strong> You land on Account Setup. You enter Bank Name, Account Type (savings, current, or domiciliary), Currency (Naira or Dollar), Personal or Business, and a Starting Balance (defaults to 0)."
+  },
+  {
+    label: "Loop setup",
+    detail: "After saving an account, you're asked <em>\"add another account?\"</em> You repeat the same form for each one until you say no — so a 2-account setup is quick and a 9-account setup just takes longer, not more steps per account."
+  },
+  {
+    label: "Dashboard",
+    detail: "Setup complete (or any later visit) lands you here. Overall Naira &amp; Dollar totals up top, then a <strong>Personal</strong> section and a <strong>Business</strong> section, each with its own ₦/$ subtotals and account list. \"Add Transaction\" and \"Add Account\" buttons are always visible."
+  },
+  {
+    label: "Add Transaction",
+    detail: "Tap \"Add Transaction,\" pick the account, choose expense or inflow, confirm/change the date (defaults to today), add a short description, enter an amount, submit."
+  },
+  {
+    label: "Instant update",
+    detail: "The account's balance updates immediately, the entry appears at the top of that account's history (newest-first), and the Dashboard totals reflect it too."
+  },
+  {
+    label: "Account Detail",
+    detail: "Tap any account row from the Dashboard to see its current balance at the top and its full transaction history below."
+  },
+  {
+    label: "Fix a mistake",
+    detail: "Tap a transaction in the history to Edit or Delete it. Editing recalculates the balance to match the correction; deleting recalculates as if it never happened."
+  }
+];
+
+const journeyEl = document.getElementById('journey');
+const detailEl = document.getElementById('journey-detail');
+
+journeySteps.forEach((step, i) => {
+  const stepEl = document.createElement('div');
+  stepEl.className = 'journey-step' + (i === 0 ? ' active' : '');
+  stepEl.innerHTML = `<div class="num">${i + 1}</div><div class="label">${step.label}</div>`;
+  stepEl.addEventListener('click', () => {
+    document.querySelectorAll('.journey-step').forEach(s => s.classList.remove('active'));
+    stepEl.classList.add('active');
+    detailEl.innerHTML = step.detail;
+  });
+  journeyEl.appendChild(stepEl);
+  if (i < journeySteps.length - 1) {
+    const arrow = document.createElement('div');
+    arrow.className = 'journey-arrow';
+    arrow.textContent = '→';
+    journeyEl.appendChild(arrow);
+  }
+});
+detailEl.innerHTML = journeySteps[0].detail;
+
+const screens = [
+  {
+    color: 'var(--pink)',
+    name: "Account Setup",
+    behavior: [
+      "Fields per account: Bank Name, Account Type (savings / current / domiciliary), Currency (Naira or Dollar), Personal or Business, Starting Balance (optional, defaults to 0).",
+      "One account per pass, looping with \"add another account?\" until declined.",
+      "Runs automatically on first open; reachable any time after via \"Add Account\" on the Dashboard."
+    ],
+    states: [
+      "Zero accounts — setup is the forced first screen.",
+      "No amount entered for starting balance — defaults to 0, not an error."
+    ],
+    criteria: [
+      "After declining \"add another account?\", you land on the Dashboard and every account you entered appears there.",
+      "Using \"Add Account\" later adds a new account without disturbing existing ones."
+    ]
+  },
+  {
+    color: 'var(--orange)',
+    name: "Dashboard",
+    behavior: [
+      "Overall totals: Total Naira and Total Dollar, summed across every account.",
+      "Personal section: its own ₦/$ subtotals plus its account list.",
+      "Business section: its own ₦/$ subtotals plus its account list.",
+      "Each account row: name, account type, currency, current balance.",
+      "\"Add Transaction\" and \"Add Account\" buttons, always available."
+    ],
+    states: [
+      "Lands here on every visit after the first setup is complete."
+    ],
+    criteria: [
+      "Every total (overall, Personal, Business) equals the sum of the relevant accounts' balances at all times.",
+      "Logging or editing a transaction updates the Dashboard totals without needing a refresh."
+    ]
+  },
+  {
+    color: 'var(--green)',
+    name: "Account Detail",
+    behavior: [
+      "Current balance at the top.",
+      "Full transaction history below, newest transaction first.",
+      "Tapping a transaction opens Edit / Delete for it."
+    ],
+    states: [
+      "No transactions yet — the history area reads \"no transactions yet\" instead of a blank space."
+    ],
+    criteria: [
+      "A newly logged transaction appears at the very top of the list immediately.",
+      "Editing or deleting a transaction updates the balance shown at the top instantly."
+    ]
+  },
+  {
+    color: 'var(--blue)',
+    name: "Add / Edit / Delete Transaction",
+    behavior: [
+      "Add: pick account (pre-selected if opened from inside that account), choose expense or inflow, set date (defaults today, editable), description, amount, submit.",
+      "Edit: same fields, pre-filled with the existing entry; saving recalculates the balance.",
+      "Delete: removes the entry; balance recalculates as if it never happened."
+    ],
+    states: [
+      "Missing or zero amount — inline error, \"please enter an amount,\" blocks submission until corrected."
+    ],
+    criteria: [
+      "Submitting with a valid amount closes the form and the new entry is visible immediately.",
+      "Submitting with no amount (or 0) shows the error and nothing is saved."
+    ]
+  }
+];
+
+const accordionEl = document.getElementById('accordion');
+screens.forEach((s, i) => {
+  const item = document.createElement('div');
+  item.className = 'accordion-item' + (i === 0 ? ' open' : '');
+  item.innerHTML = `
+    <div class="accordion-head">
+      <span class="accordion-dot" style="background:${s.color}"></span>
+      <h3>${s.name}</h3>
+      <span class="chev">▶</span>
+    </div>
+    <div class="accordion-body">
+      <h4>Behavior</h4>
+      <ul>${s.behavior.map(b => `<li>${b}</li>`).join('')}</ul>
+      <h4>States</h4>
+      <ul>${s.states.map(b => `<li>${b}</li>`).join('')}</ul>
+      <h4>You'd know it worked when...</h4>
+      ${s.criteria.map(c => `<div class="crit">${c}</div>`).join('')}
+    </div>
+  `;
+  item.querySelector('.accordion-head').addEventListener('click', () => {
+    item.classList.toggle('open');
+  });
+  accordionEl.appendChild(item);
+});
+
+const paletteColors = [
+  { hex: '#B8336A', name: 'Raspberry' },
+  { hex: '#F2AF29', name: 'Golden' },
+  { hex: '#70B77E', name: 'Sage' },
+  { hex: '#05B2DC', name: 'Sky' },
+  { hex: '#37505C', name: 'Slate' }
+];
+document.getElementById('palette').innerHTML = paletteColors.map(c => `
+  <div class="swatch">
+    <div class="swatch-color" style="background:${c.hex}"></div>
+    <div class="swatch-code">${c.hex}</div>
+  </div>
+`).join('');
+
+const states = [
+  { label: 'First use', text: 'Zero accounts — Account Setup runs automatically, looping until declined.' },
+  { label: 'Empty history', text: 'A freshly created account reads "no transactions yet."' },
+  { label: 'Invalid amount', text: 'Missing or zero amount shows "please enter an amount" and blocks submission.' },
+  { label: 'Normal use', text: 'Dashboard totals always equal the sum of starting balances plus logged transactions.' },
+  { label: 'Returning visit', text: 'Accounts, balances, and history are exactly as left — setup never repeats.' }
+];
+document.getElementById('states').innerHTML = states.map(s => `
+  <div class="state-row"><strong>${s.label}</strong><span>${s.text}</span></div>
+`).join('');
+
+const decisions = [
+  { what: 'One account at a time during setup, looping.', why: 'So setup time scales with how many accounts someone actually has, not a fixed-length form.' },
+  { what: 'Totals broken out strictly by currency — never combined.', why: 'Naira and Dollar can\'t be summed without a conversion rate, which would misrepresent real balances.' },
+  { what: 'Accounts grouped into Personal and Business sections with their own subtotals.', why: 'Chosen specifically to avoid a cluttered dashboard, instead of one flat tagged list.' },
+  { what: 'Transaction history is newest-first.', why: 'Matches how you\'d actually want to check "what did I just log."' },
+  { what: 'Edit/delete via tapping the transaction, not a swipe gesture.', why: 'More discoverable and reliable to build for a phone-first PoC — UX had to be obvious, not clever.' }
+];
+document.getElementById('decisions').innerHTML = decisions.map(d => `
+  <div class="decision"><div>${d.what}</div><div class="why">${d.why}</div></div>
+`).join('');
+
+const buildingNow = [
+  "Looped, one-at-a-time account setup (Bank Name, Type, Currency, Personal/Business, Starting Balance)",
+  "\"Add Account\" available any time from the Dashboard",
+  "Dashboard: overall + Personal + Business currency totals, grouped account lists",
+  "Account Detail page: balance + full transaction history, newest first",
+  "Add, edit, and delete a transaction with instant balance recalculation",
+  "Missing-amount validation and empty-history state",
+  "Playful, colorful visual direction per the supplied palette"
+];
+const deferred = [
+  "Export to an Excel workbook, one sheet per account",
+  "Import historical data from the existing Excel workbook",
+  "Investments — treasury bills, fixed deposits, stocks",
+  "Backup / alternate access beyond phone",
+  "Editing an account's own details after creation"
+];
+document.getElementById('building-now').innerHTML = buildingNow.map(b => `<li>${b}</li>`).join('');
+document.getElementById('deferred').innerHTML = deferred.map(b => `<li>${b}</li>`).join('');
+</script>
+
+</body>
+</html>

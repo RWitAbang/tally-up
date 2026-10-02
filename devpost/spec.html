@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tally Up — Technical Spec</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/fill/style.css">
+<style>
+  :root {
+    --pink: #B8336A;
+    --orange: #F2AF29;
+    --green: #70B77E;
+    --blue: #05B2DC;
+    --slate: #37505C;
+    --bg: #FBF8F4;
+    --card: #FFFFFF;
+    --ink: #2A2F33;
+    --ink-soft: #5B6670;
+    --border: #E8E2D8;
+    --radius: 18px;
+    --shadow: 0 4px 18px rgba(55, 80, 92, 0.08);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+    line-height: 1.55;
+    padding-bottom: 80px;
+  }
+  h1, h2, h3, .display {
+    font-family: 'Fredoka', system-ui, -apple-system, sans-serif;
+    font-weight: 600;
+  }
+  header {
+    padding: 56px 24px 40px;
+    text-align: center;
+    background: linear-gradient(135deg, var(--pink) 0%, var(--orange) 55%, var(--green) 100%);
+    color: white;
+  }
+  header h1 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    margin: 0 0 10px;
+    letter-spacing: -0.01em;
+  }
+  header p {
+    max-width: 640px;
+    margin: 0 auto;
+    font-size: 1.1rem;
+    opacity: 0.96;
+  }
+  .status-pill {
+    display: inline-block;
+    margin-top: 18px;
+    padding: 6px 16px;
+    background: rgba(255,255,255,0.22);
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  main {
+    max-width: 920px;
+    margin: -28px auto 0;
+    padding: 0 20px;
+  }
+  section.card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    padding: 32px 28px;
+    margin-bottom: 24px;
+  }
+  section.card h2 {
+    font-size: 1.5rem;
+    margin: 0 0 6px;
+    color: var(--slate);
+  }
+  .section-sub {
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+    margin: 0 0 22px;
+  }
+  code {
+    background: #F1ECE2;
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-size: 0.88em;
+  }
+
+  /* Plain-language lede */
+  .plain-lang {
+    background: linear-gradient(135deg, #FFF8EE, #FDF1E8);
+    border: 1px solid #F3DFB8;
+    border-radius: var(--radius);
+    padding: 26px 28px;
+    margin-bottom: 24px;
+    font-size: 1.02rem;
+  }
+  .plain-lang h2 { color: var(--slate); margin-top: 0; }
+
+  /* Architecture diagram */
+  .arch-svg { width: 100%; height: auto; }
+  .arch-caption { font-size: 0.85rem; color: var(--ink-soft); text-align: center; margin-top: 10px; }
+
+  /* Journey diagram (shared with PRD pattern) */
+  .journey-wrap { overflow-x: auto; padding: 8px 0 4px; }
+  .journey { display: flex; gap: 0; min-width: 900px; }
+  .journey-step {
+    flex: 1;
+    position: relative;
+    padding: 18px 10px 16px;
+    cursor: pointer;
+    border-radius: 14px;
+    transition: background 0.15s ease, transform 0.15s ease;
+    text-align: center;
+  }
+  .journey-step:hover { background: #F6F1E9; transform: translateY(-2px); }
+  .journey-step.active { background: #FFF4E2; box-shadow: inset 0 0 0 2px var(--orange); }
+  .journey-step .num {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--slate);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 600;
+    margin: 0 auto 8px;
+    font-size: 0.9rem;
+  }
+  .journey-step.active .num { background: var(--orange); }
+  .journey-step .label { font-size: 0.76rem; font-weight: 700; color: var(--slate); }
+  .journey-arrow { align-self: center; color: var(--border); font-size: 1.2rem; padding-top: 10px; }
+  .journey-detail {
+    margin-top: 18px;
+    padding: 18px 20px;
+    background: #F6F1E9;
+    border-radius: 12px;
+    border-left: 4px solid var(--orange);
+    font-size: 0.98rem;
+  }
+  .journey-detail code { background: #EFE7D8; }
+
+  /* Stack cards */
+  .stack-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+  }
+  .stack-card {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    background: #FAFAF8;
+  }
+  .stack-card .icon-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .stack-card i { font-size: 1.3rem; }
+  .stack-card h3 { margin: 0; font-size: 1.02rem; color: var(--ink); }
+  .stack-card p { margin: 0 0 6px; font-size: 0.88rem; }
+  .stack-card .why { color: var(--ink-soft); font-size: 0.83rem; }
+  .stack-card a { color: var(--blue); }
+
+  /* Accordion (shared with PRD pattern) */
+  .accordion-item { border: 1px solid var(--border); border-radius: 14px; margin-bottom: 12px; overflow: hidden; }
+  .accordion-head { display: flex; align-items: center; gap: 12px; padding: 16px 18px; cursor: pointer; background: #FAFAF8; user-select: none; }
+  .accordion-head:hover { background: #F3EFE6; }
+  .accordion-dot { width: 12px; height: 12px; border-radius: 4px; flex-shrink: 0; }
+  .accordion-head h3 { margin: 0; font-size: 1.05rem; flex: 1; color: var(--ink); }
+  .accordion-head .file-tag { font-size: 0.72rem; color: var(--ink-soft); background: #EFE9DD; padding: 2px 8px; border-radius: 999px; }
+  .chev { transition: transform 0.2s ease; color: var(--ink-soft); font-size: 0.85rem; }
+  .accordion-item.open .chev { transform: rotate(90deg); }
+  .accordion-body { max-height: 0; overflow: hidden; transition: max-height 0.25s ease; padding: 0 18px; }
+  .accordion-item.open .accordion-body { padding: 4px 18px 20px; }
+  .accordion-body p { margin: 8px 0; font-size: 0.95rem; }
+  .accordion-body .ref { font-size: 0.82rem; color: var(--ink-soft); }
+
+  /* Palette + type specimen */
+  .palette { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+  .swatch { width: 90px; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); text-align: center; }
+  .swatch-color { height: 60px; }
+  .swatch-code { font-size: 0.7rem; font-weight: 700; padding: 6px 4px; background: white; color: var(--ink-soft); }
+  .type-specimen { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 16px; }
+  .type-card { border: 1px solid var(--border); border-radius: 14px; padding: 18px; background: #FAFAF8; }
+  .type-card .big { font-family: 'Fredoka'; font-size: 1.8rem; color: var(--slate); margin-bottom: 4px; }
+  .type-card .body-sample { font-family: 'Nunito'; font-size: 1rem; }
+  .type-card .num-sample { font-family: 'Nunito'; font-weight: 800; font-size: 1.3rem; color: var(--pink); }
+  .type-card .label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-soft); margin-top: 10px; }
+  .icon-strip { display: flex; gap: 18px; margin-top: 14px; font-size: 1.6rem; }
+  .icon-strip i:nth-child(1) { color: var(--pink); }
+  .icon-strip i:nth-child(2) { color: var(--orange); }
+  .icon-strip i:nth-child(3) { color: var(--green); }
+  .icon-strip i:nth-child(4) { color: var(--blue); }
+  .icon-strip i:nth-child(5) { color: var(--slate); }
+
+  /* Schema */
+  .schema-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; }
+  .schema-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  .schema-table th, .schema-table td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  .schema-table th { color: var(--ink-soft); font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  .schema-name { font-family: 'Fredoka'; color: var(--slate); margin-bottom: 8px; }
+
+  /* File tree */
+  .filetree {
+    background: var(--slate);
+    color: #E8F0F2;
+    border-radius: 14px;
+    padding: 20px 22px;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 0.85rem;
+    overflow-x: auto;
+    line-height: 1.7;
+  }
+  .filetree .comment { color: #9FD3B8; }
+
+  /* Services */
+  .service-row { display: flex; gap: 14px; padding: 14px 16px; background: #FAFAF8; border-radius: 12px; border-left: 4px solid var(--blue); margin-bottom: 10px; }
+  .service-row strong { color: var(--slate); white-space: nowrap; }
+
+  /* Decisions / simplifications */
+  .decision { padding: 14px 16px; border-radius: 12px; background: #FDF1F6; border-left: 4px solid var(--pink); margin-bottom: 10px; font-size: 0.95rem; }
+  .decision .why { color: var(--ink-soft); font-size: 0.88rem; }
+  .simplify { padding: 14px 16px; border-radius: 12px; background: #EEF8F0; border-left: 4px solid var(--green); margin-bottom: 10px; font-size: 0.95rem; }
+  .simplify .why { color: var(--ink-soft); font-size: 0.88rem; }
+
+  .uncertainty {
+    background: linear-gradient(135deg, #EAF6FB, #F3FBF4);
+    border: 1px solid #CDEAF4;
+    border-radius: var(--radius);
+    padding: 24px 26px;
+    margin-top: 10px;
+  }
+  .uncertainty h3 { margin-top: 0; color: var(--slate); font-size: 1.05rem; }
+
+  footer { text-align: center; color: var(--ink-soft); font-size: 0.85rem; padding: 24px; }
+  .offline-note { font-size: 0.78rem; color: var(--ink-soft); text-align: center; margin-top: -8px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="status-pill">Spec · Draft for Review</div>
+  <h1>Tally Up</h1>
+  <p>The technical blueprint: a plain HTML/CSS/JS web app, a Supabase database with sign-in, and Netlify hosting — so the same tracker opens identically from your phone, laptop, and iPad.</p>
+</header>
+
+<main>
+
+  <div class="plain-lang">
+    <h2>How This Works, In Plain Language</h2>
+    <p>Tally Up is a website, not an installed app — open it in any browser (phone, laptop, iPad) and it's the same app because they're all visiting the same URL.</p>
+    <p>There's no custom backend server. Your accounts and transactions live in <strong>Supabase</strong>, a hosted database — think of it as two spreadsheet tabs sitting in the cloud instead of on your laptop: an <code>accounts</code> tab and a <code>transactions</code> tab. Every screen reads or writes rows there directly.</p>
+    <p>Because this is your personal financial data, you sign in once per device with a single email/password account. Supabase checks every request against that login — without it, the database simply refuses to hand over anything, no matter what URL someone finds.</p>
+    <p><strong>Netlify</strong> hosts the website's files and gives you the one URL that works the same on every device. No framework, no build step — every page is plain HTML, CSS, and JavaScript you can read start to finish.</p>
+  </div>
+
+  <section class="card">
+    <h2>The Shape of It</h2>
+    <p class="section-sub">What talks to what.</p>
+    <svg class="arch-svg" viewBox="0 0 860 300" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+          <path d="M0,0 L0,6 L9,3 z" fill="#37505C"/>
+        </marker>
+      </defs>
+      <!-- devices -->
+      <g>
+        <rect x="20" y="30" width="130" height="60" rx="14" fill="#FDF1F6" stroke="#B8336A" stroke-width="2"/>
+        <text x="85" y="55" text-anchor="middle" font-family="Fredoka" font-size="14" fill="#37505C">Phone</text>
+        <text x="85" y="75" text-anchor="middle" font-family="Nunito" font-size="11" fill="#5B6670">browser</text>
+
+        <rect x="20" y="120" width="130" height="60" rx="14" fill="#FFF4E2" stroke="#F2AF29" stroke-width="2"/>
+        <text x="85" y="145" text-anchor="middle" font-family="Fredoka" font-size="14" fill="#37505C">Laptop</text>
+        <text x="85" y="165" text-anchor="middle" font-family="Nunito" font-size="11" fill="#5B6670">browser</text>
+
+        <rect x="20" y="210" width="130" height="60" rx="14" fill="#EEF8F0" stroke="#70B77E" stroke-width="2"/>
+        <text x="85" y="235" text-anchor="middle" font-family="Fredoka" font-size="14" fill="#37505C">iPad</text>
+        <text x="85" y="255" text-anchor="middle" font-family="Nunito" font-size="11" fill="#5B6670">browser</text>
+      </g>
+
+      <!-- arrows to netlify -->
+      <path d="M150,60 L330,145" stroke="#37505C" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+      <path d="M150,150 L330,150" stroke="#37505C" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+      <path d="M150,240 L330,155" stroke="#37505C" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+
+      <!-- netlify -->
+      <rect x="335" y="105" width="170" height="90" rx="16" fill="#FFFFFF" stroke="#37505C" stroke-width="2"/>
+      <text x="420" y="140" text-anchor="middle" font-family="Fredoka" font-size="15" fill="#37505C">Netlify</text>
+      <text x="420" y="160" text-anchor="middle" font-family="Nunito" font-size="11" fill="#5B6670">serves the HTML/CSS/JS</text>
+      <text x="420" y="176" text-anchor="middle" font-family="Nunito" font-size="11" fill="#5B6670">one URL, every device</text>
+
+      <!-- arrow netlify to browser js then to supabase: show direct browser->supabase too -->
+      <path d="M505,150 L660,150" stroke="#37505C" stroke-width="1.5" fill="none" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+      <text x="580" y="140" text-anchor="middle" font-family="Nunito" font-size="10" fill="#5B6670">page JS calls</text>
+
+      <!-- supabase -->
+      <rect x="665" y="70" width="175" height="160" rx="16" fill="#EAF6FB" stroke="#05B2DC" stroke-width="2"/>
+      <text x="752" y="98" text-anchor="middle" font-family="Fredoka" font-size="15" fill="#37505C">Supabase</text>
+      <line x1="685" y1="110" x2="820" y2="110" stroke="#05B2DC" stroke-width="1"/>
+      <text x="752" y="132" text-anchor="middle" font-family="Nunito" font-size="11" fill="#37505C">Auth</text>
+      <text x="752" y="148" text-anchor="middle" font-family="Nunito" font-size="10" fill="#5B6670">1 email/password account</text>
+      <line x1="685" y1="160" x2="820" y2="160" stroke="#05B2DC" stroke-width="1"/>
+      <text x="752" y="180" text-anchor="middle" font-family="Nunito" font-size="11" fill="#37505C">Database (tables)</text>
+      <text x="752" y="196" text-anchor="middle" font-family="Nunito" font-size="10" fill="#5B6670">profiles · accounts · transactions</text>
+      <text x="752" y="212" text-anchor="middle" font-family="Nunito" font-size="10" fill="#5B6670">RLS: scoped to user_id</text>
+    </svg>
+    <div class="arch-caption">Every device talks to the same Netlify-hosted pages; each page's JavaScript then calls Supabase directly to read or write data. No custom backend server in between.</div>
+  </section>
+
+  <section class="card">
+    <h2>The Core Journey Through the System</h2>
+    <p class="section-sub">Click a step to see what happens, technically.</p>
+    <div class="journey-wrap">
+      <div class="journey" id="journey"></div>
+    </div>
+    <div class="journey-detail" id="journey-detail"></div>
+  </section>
+
+  <section class="card">
+    <h2>Stack</h2>
+    <p class="section-sub">Each piece, why it was picked, and the tradeoff accepted.</p>
+    <div class="stack-grid" id="stack"></div>
+  </section>
+
+  <section class="card">
+    <h2>Look &amp; Feel</h2>
+    <p class="section-sub">Palette from <code>prd.md</code>; typeface and icons locked in for this build.</p>
+    <div class="palette" id="palette"></div>
+    <div class="type-specimen">
+      <div class="type-card">
+        <div class="big">Add Transaction</div>
+        <div class="label">Fredoka — headings &amp; buttons</div>
+      </div>
+      <div class="type-card">
+        <div class="body-sample">Milk, groceries, skating fees — logged in seconds.</div>
+        <div class="num-sample">₦ 24,500.00</div>
+        <div class="label">Nunito — body text &amp; amounts</div>
+      </div>
+      <div class="type-card">
+        <div class="icon-strip">
+          <i class="ph-fill ph-wallet"></i>
+          <i class="ph-fill ph-bank"></i>
+          <i class="ph-fill ph-plus-circle"></i>
+          <i class="ph-fill ph-trend-up"></i>
+          <i class="ph-fill ph-pencil-simple"></i>
+        </div>
+        <div class="label">Phosphor Icons — fill style</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Components</h2>
+    <p class="section-sub">What each piece does, what it talks to, and the PRD behavior it serves.</p>
+    <div id="components"></div>
+  </section>
+
+  <section class="card">
+    <h2>Data Model</h2>
+    <p class="section-sub">Three tables in Supabase. Every table carries a <code>user_id</code> checked against the signed-in session via Row Level Security — more than one signed-in user strictly needs today, but it means the data is already shaped for more than one person to use this later without a schema change.</p>
+    <div class="schema-grid">
+      <div>
+        <div class="schema-name">profiles</div>
+        <table class="schema-table">
+          <tr><th>column</th><th>type</th><th>notes</th></tr>
+          <tr><td>id</td><td>uuid</td><td>matches the Auth user's id</td></tr>
+          <tr><td>name</td><td>text</td><td></td></tr>
+          <tr><td>surname</td><td>text</td><td></td></tr>
+          <tr><td>email</td><td>text</td><td>mirrors the Auth email</td></tr>
+        </table>
+      </div>
+      <div>
+        <div class="schema-name">accounts</div>
+        <table class="schema-table">
+          <tr><th>column</th><th>type</th><th>notes</th></tr>
+          <tr><td>id</td><td>uuid</td><td>primary key</td></tr>
+          <tr><td>user_id</td><td>uuid</td><td>→ profiles.id</td></tr>
+          <tr><td>bank_name</td><td>text</td><td>editable</td></tr>
+          <tr><td>account_type</td><td>text</td><td>savings / current / domiciliary — editable</td></tr>
+          <tr><td>currency</td><td>text</td><td>NGN / USD — editable</td></tr>
+          <tr><td>category</td><td>text</td><td>personal / business — editable</td></tr>
+          <tr><td>starting_balance</td><td>numeric</td><td>default 0, editable</td></tr>
+        </table>
+      </div>
+      <div>
+        <div class="schema-name">transactions</div>
+        <table class="schema-table">
+          <tr><th>column</th><th>type</th><th>notes</th></tr>
+          <tr><td>id</td><td>uuid</td><td>primary key</td></tr>
+          <tr><td>user_id</td><td>uuid</td><td>→ profiles.id</td></tr>
+          <tr><td>account_id</td><td>uuid</td><td>→ accounts.id</td></tr>
+          <tr><td>type</td><td>text</td><td>expense / inflow</td></tr>
+          <tr><td>date</td><td>date</td><td>defaults to today</td></tr>
+          <tr><td>description</td><td>text</td><td></td></tr>
+          <tr><td>amount</td><td>numeric</td><td>must be &gt; 0</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="look-feel-note" style="background:#F6F1E9; border-radius:12px; padding:16px 18px; margin-top:16px; font-size:0.95rem;">
+      <strong>A balance is never stored.</strong> It's computed every time as <code>starting_balance + inflows − expenses</code> from that account's rows. Editing or deleting a transaction can't leave a stale balance behind, because there's no separate number to forget to update. Editing <code>starting_balance</code> itself just shifts this same computation.
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>File Structure</h2>
+    <div class="filetree">
+tally-up/<br>
+├── index.html <span class="comment">// checks session + accounts, routes accordingly</span><br>
+├── sign-in.html <span class="comment">// email + password, one account only</span><br>
+├── setup.html <span class="comment">// account add AND edit (?account= switches mode)</span><br>
+├── dashboard.html <span class="comment">// totals + Personal/Business sections, Export button</span><br>
+├── account.html <span class="comment">// one account's balance + history (?id=)</span><br>
+├── transaction.html <span class="comment">// add/edit a transaction (?account=&amp;transaction=)</span><br>
+├── css/<br>
+│&nbsp;&nbsp;&nbsp;└── style.css <span class="comment">// palette, Fredoka/Nunito, layout</span><br>
+├── js/<br>
+│&nbsp;&nbsp;&nbsp;├── supabase-client.js <span class="comment">// Supabase URL + key, shared client</span><br>
+│&nbsp;&nbsp;&nbsp;├── auth-guard.js <span class="comment">// redirects to sign-in if no session</span><br>
+│&nbsp;&nbsp;&nbsp;├── sign-in.js<br>
+│&nbsp;&nbsp;&nbsp;├── setup.js <span class="comment">// account add AND edit</span><br>
+│&nbsp;&nbsp;&nbsp;├── dashboard.js<br>
+│&nbsp;&nbsp;&nbsp;├── account.js<br>
+│&nbsp;&nbsp;&nbsp;├── transaction.js<br>
+│&nbsp;&nbsp;&nbsp;└── export.js <span class="comment">// builds .xlsx with SheetJS, triggers download</span><br>
+└── devpost/ <span class="comment">// planning docs (this workspace)</span>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>External Services</h2>
+    <div class="service-row"><strong>Supabase</strong><span>Hosted Postgres + Auth. Client calls via <code>supabase-js@2.117.2</code> (CDN). Free tier: 500MB database, 50K monthly active users, unlimited API requests — projects pause after a week idle. <a href="https://supabase.com/docs" target="_blank">docs</a></span></div>
+    <div class="service-row" style="border-left-color: var(--green);"><strong>Netlify</strong><span>Static hosting, auto-deploys from GitHub on push. Free tier: 300 credits/month (a deploy costs 15, bandwidth 20/GB). <a href="https://docs.netlify.com/" target="_blank">docs</a></span></div>
+    <div class="service-row" style="border-left-color: var(--pink);"><strong>Google Fonts</strong><span>Fredoka + Nunito via &lt;link&gt;, no key needed.</span></div>
+    <div class="service-row" style="border-left-color: var(--orange);"><strong>Phosphor Icons</strong><span>Fill-style icon set via jsDelivr CDN (unpkg stopped reliably serving this package — verify the jsDelivr link loads early in the build).</span></div>
+    <div class="service-row" style="border-left-color: var(--green);"><strong>SheetJS</strong><span>Generates the .xlsx workbook entirely client-side for Export. <code>&lt;script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"&gt;</code>, no key needed. <a href="https://docs.sheetjs.com/docs/getting-started/installation/standalone/" target="_blank">docs</a></span></div>
+  </section>
+
+  <section class="card">
+    <h2>Important Failure Modes</h2>
+    <div class="service-row" style="border-left-color: var(--slate);">No amount entered (or 0) → inline "please enter an amount," submission blocked.</div>
+    <div class="service-row" style="border-left-color: var(--slate);">New account, no transactions yet → "no transactions yet" instead of blank space.</div>
+    <div class="service-row" style="border-left-color: var(--slate);">Wrong email/password → plain inline error, no lockout logic for a single-user PoC.</div>
+    <div class="service-row" style="border-left-color: var(--slate);">Supabase request slow or fails → a loading state while waiting, a plain "couldn't load — try again" on failure.</div>
+    <div class="service-row" style="border-left-color: var(--slate);">"Export to Excel" tapped with zero accounts → plain inline message ("add an account first") instead of an empty or broken file.</div>
+  </section>
+
+  <section class="card">
+    <h2>What Was Simplified and Why</h2>
+    <div id="simplifications"></div>
+  </section>
+
+  <section class="card">
+    <h2>Decisions Along the Way</h2>
+    <div id="decisions"></div>
+  </section>
+
+  <div class="uncertainty">
+    <h3>🧭 One Genuine Uncertainty</h3>
+    <p>All three new pieces here — the multi-page JS structure, Supabase, and Netlify — are unfamiliar to the learner right now. Rather than discovering a setup problem mid-build, the very first build step is a small, throwaway test: create the Supabase project and its two tables, then build one page that inserts a dummy row and reads it back. That catches key/connection/RLS problems while nothing else depends on them yet.</p>
+  </div>
+
+  <section class="card" style="margin-top:24px;">
+    <h2>Carried Over from the PRD</h2>
+    <div class="service-row" style="border-left-color: var(--green);">
+      <span>✓</span>
+      <span>Whether an account's own details can be edited after creation — resolved above: yes, editable. No open questions remain.</span>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Tally Up — Spec companion · Canonical document: <code>devpost/spec.md</code>
+  <div class="offline-note">Diagrams and interactions are self-contained inline SVG/JS. Fonts and icons load from Google Fonts / jsDelivr; the page remains fully readable if either CDN is unreachable.</div>
+</footer>
+
+<script>
+const journeySteps = [
+  { label: "Open the URL", detail: "You open Tally Up on your phone. <code>index.html</code> checks: is there a valid Supabase sign-in session for this browser? If not, you're sent to <code>sign-in.html</code>." },
+  { label: "Sign in", detail: "You sign in with your one email/password account. Supabase hands back a session; its client library stores it in the browser automatically — that's what keeps you signed in on that device afterward." },
+  { label: "First-open check", detail: "<code>index.html</code> asks Supabase: any rows in <code>accounts</code> yet? None → sent to <code>setup.html</code>." },
+  { label: "Account Setup", detail: "You fill in one account's details, save → an <code>insert</code> into <code>accounts</code>. \"Add another?\" loops you through the form until you decline, then you land on <code>dashboard.html</code>." },
+  { label: "Later visits", detail: "Once signed in with accounts already created, <code>index.html</code> sends you straight to <code>dashboard.html</code> — setup never repeats." },
+  { label: "Dashboard", detail: "Loads → asks Supabase for every account and transaction, adds them up in the browser (by currency, then Personal/Business), and renders totals plus each account row." },
+  { label: "Add Transaction", detail: "Pick the account, choose expense/inflow, confirm/edit the date, add description + amount, submit → an <code>insert</code> into <code>transactions</code>. Back on the Dashboard, totals update immediately from a fresh fetch." },
+  { label: "Account Detail", detail: "Tap an account row → <code>account.html?id=...</code> → fetches that account + its transactions, computes its balance fresh (starting balance + its transactions), shows history newest-first." },
+  { label: "Fix a mistake", detail: "Tap a transaction → <code>transaction.html</code>, pre-filled, Edit/Delete. Save → <code>update</code>; Delete → <code>delete</code>. The next balance calculation just reflects whatever rows remain." },
+  { label: "Edit an account", detail: "Tap \"Edit\" on <code>account.html</code> → <code>setup.html?account=...</code>, the same form as Account Setup, pre-filled, in single-save mode (no \"add another?\" loop) → <code>update</code> on that row in <code>accounts</code>." },
+  { label: "Export to Excel", detail: "Tap \"Export to Excel\" on the Dashboard, any time → fetches every account and transaction, builds a workbook with one sheet per account using SheetJS, and triggers a file download. Entirely client-side, no server involved." }
+];
+
+const journeyEl = document.getElementById('journey');
+const detailEl = document.getElementById('journey-detail');
+journeySteps.forEach((step, i) => {
+  const stepEl = document.createElement('div');
+  stepEl.className = 'journey-step' + (i === 0 ? ' active' : '');
+  stepEl.innerHTML = `<div class="num">${i + 1}</div><div class="label">${step.label}</div>`;
+  stepEl.addEventListener('click', () => {
+    document.querySelectorAll('.journey-step').forEach(s => s.classList.remove('active'));
+    stepEl.classList.add('active');
+    detailEl.innerHTML = step.detail;
+  });
+  journeyEl.appendChild(stepEl);
+  if (i < journeySteps.length - 1) {
+    const arrow = document.createElement('div');
+    arrow.className = 'journey-arrow';
+    arrow.textContent = '→';
+    journeyEl.appendChild(arrow);
+  }
+});
+detailEl.innerHTML = journeySteps[0].detail;
+
+const stack = [
+  { icon: 'ph-fill ph-code', color: 'var(--pink)', name: 'HTML / CSS / JavaScript', why: 'No framework, no build step — builds directly on the HTML already known; every file reads top to bottom.', link: null },
+  { icon: 'ph-fill ph-database', color: 'var(--blue)', name: 'Supabase (Postgres + Auth)', why: 'No server to run or maintain; tables/rows map onto the existing Excel mental model (a sheet per account).', link: 'https://supabase.com/docs/reference/javascript/introduction' },
+  { icon: 'ph-fill ph-lock-key', color: 'var(--slate)', name: 'Supabase Auth', why: 'Reuses the same Supabase project — one pre-created account, no public sign-up page, session persists per device.', link: 'https://supabase.com/docs/guides/auth' },
+  { icon: 'ph-fill ph-cloud-arrow-up', color: 'var(--green)', name: 'Netlify', why: 'Already have an account; auto-deploys from GitHub on push — ties into the Git/GitHub learning goal.', link: 'https://docs.netlify.com/' },
+  { icon: 'ph-fill ph-text-aa', color: 'var(--orange)', name: 'Fredoka + Nunito', why: 'Playful headings, legible body text and amounts — explicitly not default system fonts.', link: 'https://fonts.google.com/' },
+  { icon: 'ph-fill ph-shapes', color: 'var(--pink)', name: 'Phosphor Icons (fill)', why: 'Colorful, playful icon style instead of generic thin-line defaults.', link: 'https://github.com/phosphor-icons/web' },
+  { icon: 'ph-fill ph-file-xls', color: 'var(--green)', name: 'SheetJS (xlsx)', why: 'Generates a real .xlsx workbook entirely client-side for the Export feature — no server, no new service, just a script tag.', link: 'https://docs.sheetjs.com/docs/getting-started/installation/standalone/' }
+];
+document.getElementById('stack').innerHTML = stack.map(s => `
+  <div class="stack-card">
+    <div class="icon-row"><i class="${s.icon}" style="color:${s.color}"></i><h3>${s.name}</h3></div>
+    <p class="why">${s.why}</p>
+    ${s.link ? `<a href="${s.link}" target="_blank">docs ↗</a>` : ''}
+  </div>
+`).join('');
+
+const paletteColors = [
+  { hex: '#B8336A', name: 'Raspberry' },
+  { hex: '#F2AF29', name: 'Golden' },
+  { hex: '#70B77E', name: 'Sage' },
+  { hex: '#05B2DC', name: 'Sky' },
+  { hex: '#37505C', name: 'Slate' }
+];
+document.getElementById('palette').innerHTML = paletteColors.map(c => `
+  <div class="swatch"><div class="swatch-color" style="background:${c.hex}"></div><div class="swatch-code">${c.hex}</div></div>
+`).join('');
+
+const components = [
+  { color: 'var(--slate)', name: 'Supabase Client & Session Guard', file: 'js/supabase-client.js, js/auth-guard.js', body: "Creates the shared Supabase client (project URL + anon key) used by every page, and redirects to sign-in.html whenever a protected page loads without a valid session. Underpins everything below.", ref: null },
+  { color: 'var(--pink)', name: 'Sign In', file: 'sign-in.html / js/sign-in.js', body: "Email + password form, calls supabase.auth.signInWithPassword(). Success → index.html. Failure → plain inline error. No registration form exists anywhere in the app.", ref: null },
+  { color: 'var(--orange)', name: 'Account Setup (also Account Edit)', file: 'setup.html / js/setup.js', body: "Two modes, same form: no ?account= param → one-at-a-time add flow, inserts into accounts, loops on \"add another?\" until declined. ?account=&lt;id&gt; → pre-filled single-edit mode (tapped \"Edit\" from Account Detail), updates that row instead.", ref: 'prd.md &gt; Account Setup' },
+  { color: 'var(--green)', name: 'Dashboard', file: 'dashboard.html / js/dashboard.js', body: "Fetches all accounts and transactions, computes overall + Personal + Business subtotals per currency in JavaScript, renders account rows plus Add Transaction / Add Account buttons.", ref: 'prd.md &gt; Dashboard' },
+  { color: 'var(--blue)', name: 'Account Detail', file: 'account.html / js/account.js', body: "Reads ?id= from the URL, fetches that account + its transactions, computes current balance, renders history newest-first, links each row into the transaction editor.", ref: 'prd.md &gt; Account Detail' },
+  { color: 'var(--pink)', name: 'Add / Edit / Delete Transaction', file: 'transaction.html / js/transaction.js', body: "Reads ?account= (and ?transaction= if editing). Validates amount present and non-zero before submit. Inserts, updates, or deletes a transactions row, then returns to where the user came from.", ref: 'prd.md &gt; Add / Edit / Delete Transaction' },
+  { color: 'var(--green)', name: 'Export to Excel', file: 'js/export.js, triggered from dashboard.html', body: "Fetches every account and its transactions, builds one worksheet per account (Date, Type, Description, Amount) with SheetJS, names each sheet after the account (sanitized, 31-char Excel limit), and calls XLSX.writeFile() to trigger a download. Entirely client-side.", ref: 'prd.md &gt; Export to Excel' }
+];
+document.getElementById('components').innerHTML = components.map((c, i) => `
+  <div class="accordion-item${i === 0 ? ' open' : ''}">
+    <div class="accordion-head">
+      <span class="accordion-dot" style="background:${c.color}"></span>
+      <h3>${c.name}</h3>
+      <span class="file-tag">${c.file}</span>
+      <span class="chev">▶</span>
+    </div>
+    <div class="accordion-body">
+      <p>${c.body}</p>
+      ${c.ref ? `<p class="ref">Implements <code>${c.ref}</code></p>` : ''}
+    </div>
+  </div>
+`).join('');
+document.querySelectorAll('#components .accordion-head').forEach(h => {
+  h.addEventListener('click', () => h.closest('.accordion-item').classList.toggle('open'));
+});
+
+const simplifications = [
+  { what: 'Plain HTML/CSS/JS instead of a frontend framework.', why: 'Every file stays directly readable while learning; no build step to debug. A framework would earn its cost only with much more shared, fast-changing UI state than this app has.' },
+  { what: 'Computed balance instead of a stored, updated balance field.', why: 'Removes an entire bug class (stale balances after edit/delete) for a trivially cheap sum at this data scale.' },
+  { what: 'One pre-created Supabase Auth account instead of a sign-up flow.', why: 'There is, and will only ever be, one user today — a public registration page would add a screen and an attack surface with no one else to use it yet.' },
+  { what: 'No real-time sync between devices.', why: 'Each page re-fetches on load rather than pushing live updates between simultaneously-open devices — unnecessary for one person using one device at a time.' },
+  { what: 'Account editing reuses the Account Setup form instead of a new screen.', why: 'Same fields, same validation — just pre-filled and in single-save mode. A separate screen would duplicate logic for no benefit.' },
+  { what: 'Export builds the workbook in the browser instead of on a server.', why: 'SheetJS generates a real .xlsx file client-side — no backend endpoint or file storage needed just to produce a download.' }
+];
+document.getElementById('simplifications').innerHTML = simplifications.map(s => `
+  <div class="simplify"><div>${s.what}</div><div class="why">${s.why}</div></div>
+`).join('');
+
+const decisions = [
+  { what: 'Web app now, native phone app later.', why: 'Learner\'s choice — keeps the PoC simple while leaving the door open.' },
+  { what: 'Supabase + Netlify instead of browser-only localStorage.', why: 'Upgraded once the learner identified a real need to use the same data from phone, laptop, and iPad.' },
+  { what: 'Supabase over Firebase or Appwrite.', why: 'Its tables/rows map directly onto the existing Excel mental model — a sheet per account.' },
+  { what: 'Netlify over Vercel.', why: 'The learner already has a Netlify account; functionally equivalent otherwise.' },
+  { what: 'Authentication added, one account, no public sign-up.', why: 'A genuine concern, not a hypothetical one — an accidentally-discoverable URL exposing real personal finances. Reuses the Supabase project already chosen rather than adding a new service.' },
+  { what: 'Session stays signed in per device until manual sign-out.', why: 'Matches the "fast, zero-friction" goal — no desire for more frequent re-login.' },
+  { what: 'Data stays on Supabase for now; private self-hosting is a later option, not built now.', why: 'Supabase is open-source Postgres underneath, so nothing locks the data in if that\'s wanted later — building it now would be unneeded infrastructure work for a PoC.' },
+  { what: 'A profiles table plus a user_id column on accounts and transactions, despite only one user today.', why: 'The learner flagged that other people will need to set up their own details later. This shapes the data so a future self-service sign-up could be added without restructuring — each future user\'s rows are already scoped to just them.' },
+  { what: 'Bank account details are editable after creation.', why: 'Resolves the PRD\'s open question — reuses the Account Setup form in single-edit mode rather than a new screen.' },
+  { what: 'Export to Excel pulled back into the PoC.', why: 'Originally deferred so the build could prove the core logging loop first; the learner asked for it explicitly here, and it\'s a small, self-contained addition (one client-side library, no new service) that doesn\'t strain the complexity budget.' }
+];
+document.getElementById('decisions').innerHTML = decisions.map(d => `
+  <div class="decision"><div>${d.what}</div><div class="why">${d.why}</div></div>
+`).join('');
+</script>
+
+</body>
+</html>
