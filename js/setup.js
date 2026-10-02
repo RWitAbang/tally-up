@@ -1,6 +1,6 @@
 import { supabase } from './supabase-client.js';
 import { requireSession } from './auth-guard.js';
-import { formatAmount, parseAmount } from './currency.js';
+import { formatAmount, parseAmount, attachLiveAmountFormatting } from './currency.js';
 
 const session = await requireSession();
 
@@ -11,6 +11,8 @@ if (session) {
   const errorEl = document.getElementById('error');
   const balanceInput = document.getElementById('starting_balance');
   const balanceErrorEl = document.getElementById('balance-error');
+
+  attachLiveAmountFormatting(balanceInput);
 
   balanceInput.addEventListener('blur', () => {
     if (balanceInput.value.trim() === '') {
