@@ -1,5 +1,6 @@
 import { supabase } from './supabase-client.js';
 import { requireSession } from './auth-guard.js';
+import { formatAmount, parseAmount } from './currency.js';
 
 const session = await requireSession();
 
@@ -8,16 +9,42 @@ if (session) {
   const formSection = document.getElementById('form-section');
   const confirmSection = document.getElementById('confirm-section');
   const errorEl = document.getElementById('error');
+  const balanceInput = document.getElementById('starting_balance');
+  const balanceErrorEl = document.getElementById('balance-error');
+
+  balanceInput.addEventListener('blur', () => {
+    if (balanceInput.value.trim() === '') {
+      balanceErrorEl.textContent = '';
+      return;
+    }
+    const parsed = parseAmount(balanceInput.value);
+    if (Number.isNaN(parsed)) {
+      balanceErrorEl.textContent = 'Please enter a number';
+    } else {
+      balanceErrorEl.textContent = '';
+      balanceInput.value = formatAmount(parsed);
+    }
+  });
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     errorEl.textContent = '';
+    balanceErrorEl.textContent = '';
 
     const bankName = form.bank_name.value.trim();
     const accountType = form.account_type.value;
     const currency = form.currency.value;
     const category = form.category.value;
-    const startingBalance = form.starting_balance.value === '' ? 0 : Number(form.starting_balance.value);
+
+    let startingBalance = 0;
+    if (balanceInput.value.trim() !== '') {
+      const parsed = parseAmount(balanceInput.value);
+      if (Number.isNaN(parsed)) {
+        balanceErrorEl.textContent = 'Please enter a number';
+        return;
+      }
+      startingBalance = parsed;
+    }
 
     if (!bankName) {
       errorEl.textContent = 'please enter a bank name';

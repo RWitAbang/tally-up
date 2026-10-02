@@ -36,7 +36,8 @@
         </select>
 
         <label for="starting_balance">Starting Balance</label>
-        <input type="number" id="starting_balance" name="starting_balance" step="0.01" placeholder="0" />
+        <input type="text" inputmode="decimal" id="starting_balance" name="starting_balance" placeholder="0" />
+        <p class="error" id="balance-error"></p>
 
         <button type="submit">Save Account</button>
         <p class="error" id="error"></p>

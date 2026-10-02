@@ -81,7 +81,7 @@ Build mode: learn
 
 ## Hands-on Checkpoints
 
-- [ ] Early usable behavior explored — after Slice 2, once you can add your real accounts and see them listed
+- [x] Early usable behavior explored — after Slice 2, once you can add your real accounts and see them listed
 - [ ] Final kick-the-tires exploration and feedback completed
 
 ## Final Review
@@ -104,3 +104,5 @@ Activity mode: [not yet started]
 
 - Added explicit `grant` statements for the `authenticated` role on `accounts`, `transactions`, and `profiles`, on top of the RLS policies from the original plan — raw SQL table creation in Supabase doesn't auto-grant table privileges the way its dashboard UI does, and the first live insert failed with "permission denied" until these were added. No change to `scope.md`/`prd.md`/`spec.md`; this is a one-time setup correction in the Supabase project itself.
 - Netlify's "Team protection" (Visitor access) defaulted to Private, which would have blocked anyone — including the learner on their phone — from reaching the deployed site without a Netlify login. Switched Project visibility to Public in Netlify's Site configuration; the app's own Supabase Auth sign-in remains the actual access gate, unaffected by this setting.
+- Dashboard listing is sorted alphabetically by bank name (not creation order) — learner preference discovered during the early checkpoint, not specified in `prd.md`/`spec.md`.
+- Starting Balance now uses a custom-formatted text input (comma-grouped, 2 decimals on blur) with our own inline validation message, instead of a native `type="number"` input — the learner wanted thousands separators and a styled "Please enter a number" message, neither of which a native number input can do. The same `js/currency.js` helper will be reused for the transaction Amount field in Slice 4.
