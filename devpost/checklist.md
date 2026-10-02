@@ -9,7 +9,7 @@ Build mode: learn
 
 ## Slices
 
-- [ ] **1. Prove the foundation: sign in, save data, and go live**
+- [x] **1. Prove the foundation: sign in, save data, and go live**
   Becomes usable: You can open the deployed Netlify URL on your phone, sign in with the one account, and see proof that a row written to Supabase was saved and read back correctly.
   Why now: Supabase, Auth, RLS, and Netlify are all unfamiliar to you and everything else gets built on top of them. The spec's own plan is to prove this chain with a throwaway test before any real UI depends on it — bad news here is cheap; bad news three slices in is not. This also covers project bootstrapping (file structure, Git, deployment).
   PRD ref: n/a (infrastructure step named directly in `spec.md > Decisions and Open Issues`, the "one genuine uncertainty" paragraph)
@@ -101,3 +101,6 @@ Reflection: [not yet started]
 Activity mode: [not yet started]
 
 ## Revisions
+
+- Added explicit `grant` statements for the `authenticated` role on `accounts`, `transactions`, and `profiles`, on top of the RLS policies from the original plan — raw SQL table creation in Supabase doesn't auto-grant table privileges the way its dashboard UI does, and the first live insert failed with "permission denied" until these were added. No change to `scope.md`/`prd.md`/`spec.md`; this is a one-time setup correction in the Supabase project itself.
+- Netlify's "Team protection" (Visitor access) defaulted to Private, which would have blocked anyone — including the learner on their phone — from reaching the deployed site without a Netlify login. Switched Project visibility to Public in Netlify's Site configuration; the app's own Supabase Auth sign-in remains the actual access gate, unaffected by this setting.
