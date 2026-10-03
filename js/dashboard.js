@@ -7,6 +7,7 @@ const session = await requireSession();
 
 if (session) {
   const statusEl = document.getElementById('status');
+  const dashboardContentEl = document.getElementById('dashboard-content');
   const totalsEl = document.getElementById('totals');
   const sectionsEl = document.getElementById('sections');
 
@@ -19,6 +20,7 @@ if (session) {
     statusEl.textContent = "couldn't load — try again";
   } else {
     statusEl.textContent = '';
+    dashboardContentEl.hidden = false;
     renderDashboard(accounts, transactions, totalsEl, sectionsEl);
   }
 

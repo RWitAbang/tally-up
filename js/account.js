@@ -9,6 +9,7 @@ if (session) {
   const accountId = params.get('id');
 
   const statusEl = document.getElementById('status');
+  const accountContentEl = document.getElementById('account-content');
   const nameEl = document.getElementById('account-name');
   const numberLineEl = document.getElementById('account-number-line');
   const balanceSectionEl = document.getElementById('balance-section');
@@ -28,6 +29,7 @@ if (session) {
     statusEl.textContent = "couldn't load — try again";
   } else {
     statusEl.textContent = '';
+    accountContentEl.hidden = false;
     const typeLabel = account.account_type.charAt(0).toUpperCase() + account.account_type.slice(1);
     nameEl.innerHTML = `${account.bank_name} <span class="account-type-inline">${typeLabel}</span>`;
     numberLineEl.textContent = account.account_number || '';
