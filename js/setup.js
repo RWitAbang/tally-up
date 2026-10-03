@@ -62,6 +62,24 @@ if (session) {
       return;
     }
 
+    const escapedBankName = bankName.replace(/[%_]/g, '\\$&');
+    const { data: matches } = await supabase
+      .from('accounts')
+      .select('id')
+      .ilike('bank_name', escapedBankName)
+      .eq('account_type', accountType)
+      .eq('currency', currency)
+      .eq('category', category);
+
+    if (matches && matches.length > 0) {
+      const proceed = window.confirm(
+        `You already have a ${category} ${accountType} account at ${bankName} in ${currency}. Add another one anyway?`
+      );
+      if (!proceed) {
+        return;
+      }
+    }
+
     const { error } = await supabase.from('accounts').insert({
       user_id: session.user.id,
       bank_name: bankName,
