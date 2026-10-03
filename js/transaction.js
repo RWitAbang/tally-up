@@ -1,12 +1,13 @@
 import { supabase } from './supabase-client.js';
 import { requireSession } from './auth-guard.js';
-import { parseAmount, attachLiveAmountFormatting } from './currency.js';
+import { parseAmount, formatAmount, attachLiveAmountFormatting } from './currency.js';
 
 const session = await requireSession();
 
 if (session) {
   const params = new URLSearchParams(window.location.search);
   const preselectedAccount = params.get('account');
+  const transactionId = params.get('transaction');
 
   const accountSelect = document.getElementById('account');
   const { data: accounts } = await supabase
@@ -20,19 +21,40 @@ if (session) {
     option.textContent = account.bank_name;
     accountSelect.appendChild(option);
   }
-  if (preselectedAccount) {
-    accountSelect.value = preselectedAccount;
-  }
 
   const dateInput = document.getElementById('date');
-  dateInput.value = new Date().toISOString().slice(0, 10);
-
+  const descriptionInput = document.getElementById('description');
   const amountInput = document.getElementById('amount');
-  attachLiveAmountFormatting(amountInput);
   const amountErrorEl = document.getElementById('amount-error');
-
-  const form = document.getElementById('transaction-form');
   const errorEl = document.getElementById('error');
+  const form = document.getElementById('transaction-form');
+  const saveButton = document.getElementById('save-button');
+  const deleteButton = document.getElementById('delete');
+  const pageTitle = document.getElementById('page-title');
+
+  attachLiveAmountFormatting(amountInput);
+
+  let existingTransaction = null;
+
+  if (transactionId) {
+    const { data: tx } = await supabase.from('transactions').select('*').eq('id', transactionId).single();
+    existingTransaction = tx;
+
+    pageTitle.textContent = 'Edit Transaction';
+    saveButton.textContent = 'Save Changes';
+    deleteButton.hidden = false;
+
+    accountSelect.value = tx.account_id;
+    form.type.value = tx.type;
+    dateInput.value = tx.date;
+    descriptionInput.value = tx.description ?? '';
+    amountInput.value = formatAmount(tx.amount);
+  } else {
+    dateInput.value = new Date().toISOString().slice(0, 10);
+    if (preselectedAccount) {
+      accountSelect.value = preselectedAccount;
+    }
+  }
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -42,7 +64,7 @@ if (session) {
     const accountId = accountSelect.value;
     const type = form.type.value;
     const date = dateInput.value;
-    const description = form.description.value.trim();
+    const description = descriptionInput.value.trim();
     const amount = parseAmount(amountInput.value);
 
     if (!accountId) {
@@ -52,6 +74,21 @@ if (session) {
 
     if (Number.isNaN(amount) || amount <= 0) {
       amountErrorEl.textContent = 'please enter an amount';
+      return;
+    }
+
+    if (existingTransaction) {
+      const { error } = await supabase
+        .from('transactions')
+        .update({ account_id: accountId, type, date, description, amount })
+        .eq('id', existingTransaction.id);
+
+      if (error) {
+        errorEl.textContent = "couldn't save — try again";
+        return;
+      }
+
+      window.location.href = `account.html?id=${accountId}`;
       return;
     }
 
@@ -72,7 +109,25 @@ if (session) {
     window.location.href = 'dashboard.html';
   });
 
+  deleteButton.addEventListener('click', async () => {
+    if (!existingTransaction) return;
+
+    const confirmed = window.confirm('Delete this transaction?');
+    if (!confirmed) return;
+
+    const { error } = await supabase.from('transactions').delete().eq('id', existingTransaction.id);
+
+    if (error) {
+      errorEl.textContent = "couldn't delete — try again";
+      return;
+    }
+
+    window.location.href = `account.html?id=${existingTransaction.account_id}`;
+  });
+
   document.getElementById('cancel').addEventListener('click', () => {
-    window.location.href = 'dashboard.html';
+    window.location.href = existingTransaction
+      ? `account.html?id=${existingTransaction.account_id}`
+      : 'dashboard.html';
   });
 }

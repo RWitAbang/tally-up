@@ -10,7 +10,7 @@
 </head>
 <body>
   <div class="card">
-    <h1>Add Transaction</h1>
+    <h1 id="page-title">Add Transaction</h1>
     <form id="transaction-form">
       <label for="account">Account</label>
       <select id="account" name="account" required></select>
@@ -31,7 +31,8 @@
       <input type="text" inputmode="decimal" id="amount" name="amount" placeholder="0.00" />
       <p class="error" id="amount-error"></p>
 
-      <button type="submit">Save Transaction</button>
+      <button type="submit" id="save-button">Save Transaction</button>
+      <button type="button" id="delete" class="secondary" hidden>Delete</button>
       <button type="button" id="cancel" class="secondary">Cancel</button>
       <p class="error" id="error"></p>
     </form>

@@ -49,7 +49,7 @@ Build mode: learn
   Learner check: Log a real transaction from your phone and watch the account balance and dashboard totals update immediately.
   Commit: `Add transaction logging with account detail view and balance calculation`
 
-- [ ] **5. Fix a mistake: edit or delete a transaction**
+- [x] **5. Fix a mistake: edit or delete a transaction**
   Becomes usable: Tapping a past transaction lets you correct or remove it, with the balance always catching up.
   Why now: Mistakes are inevitable in a fast-entry tool; this closes the loop the PRD calls "Fixing a mistake."
   PRD ref: `prd.md > Fixing a mistake`

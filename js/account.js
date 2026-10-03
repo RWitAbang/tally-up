@@ -46,8 +46,9 @@ if (session) {
     } else {
       historyListEl.innerHTML = '';
       for (const tx of transactions) {
-        const row = document.createElement('div');
+        const row = document.createElement('a');
         row.className = 'transaction-row';
+        row.href = `transaction.html?account=${accountId}&transaction=${tx.id}`;
         const sign = tx.type === 'inflow' ? '+' : '−';
         row.innerHTML = `
           <div class="transaction-row-main">
