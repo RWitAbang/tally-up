@@ -34,6 +34,7 @@ You open the app and see a dashboard: total balance in Naira at the top, total i
 - Import historical data from your existing Excel workbook
 - Investments: treasury bills, fixed deposits, stocks
 - Backup/alternate access beyond phone (may fall out naturally if this is a web app)
+- A consolidated navigation menu — Sign Out, Export to Excel, and Edit Account currently live as separate direct controls rather than one menu; raised during `5-build` final review, deferred rather than built then
 
 ## Explicitly Cut
 - Nothing cut — this PoC is already a tight boundary around the dashboard + multi-account transaction log.

@@ -40,10 +40,11 @@ Minimal and clean, but colorful and playful — not sterile, not a bare spreadsh
 - Kept as its own piece of data, separate from bank accounts, so a future version could let more than one person set up their own profile without changing how bank accounts or transactions work.
 
 ### Account Setup
-- Fields per account: Bank Name, Account Type (savings, current, or domiciliary), Currency (Naira or Dollar), Personal or Business, Starting Balance (optional, defaults to 0).
+- Fields per account: Bank Name, Account Number (optional), Account Type (savings, current, or domiciliary), Currency (Naira or Dollar), Personal or Business, Starting Balance (optional, defaults to 0).
 - One account at a time, looping with "add another account?" until declined — so someone with 2 accounts isn't stuck filling out a form sized for 9.
 - Available on first open (forced, until at least one account exists) and afterward on demand via "Add Account" on the Dashboard.
-- **Account details can be edited after creation** — Bank Name, Account Type, Currency, Personal/Business, and Starting Balance are all editable later, not just at setup.
+- **Account details can be edited after creation** — Bank Name, Account Number, Account Type, Currency, Personal/Business, and Starting Balance are all editable later, not just at setup.
+- Account Number was added during `5-build` final review: with same-bank, same-type accounts in play (e.g. two savings accounts at the same bank), bank name and type alone weren't always enough to tell accounts apart at a glance.
 
 ### Dashboard
 - Overall totals: Total Naira and Total Dollar, summed across every account regardless of personal/business.
@@ -53,19 +54,22 @@ Minimal and clean, but colorful and playful — not sterile, not a bare spreadsh
 - "Add Transaction" button and "Add Account" button, both always available.
 
 ### Account Detail
+- Account type and account number (if set) shown just below the bank name, so it's always clear which account you're looking at.
 - Current balance at the top.
 - Full transaction history below, newest transaction first.
 - Tapping a transaction opens Edit/Delete for it.
 
 ### Add / Edit / Delete Transaction
-- Add: pick the account (pre-selected if you tapped in from that account's page), choose expense or inflow, set the date (defaults to today, editable), enter a description, enter an amount, submit.
-- On submit: the account balance updates immediately, the entry appears at the top of that account's history, and Dashboard totals reflect it.
+- Add: pick the account (pre-selected if you tapped in from that account's page; shown with its account type to tell similarly-named accounts apart), choose expense or inflow, set the date (defaults to today, editable), enter a description, enter an amount, submit.
+- On submit: the account balance updates immediately, the entry appears at the top of that account's history, and Dashboard totals reflect it. You land back on that account's page, not the Dashboard.
 - Edit: same fields, pre-filled with the existing entry; saving recalculates the account balance to match the correction.
 - Delete: removes the entry from history; the account balance recalculates as if it never happened.
 
 ### Export to Excel
 - A button, available at any time (not gated behind any flow), exports everything currently tracked into a real Excel workbook (.xlsx) — one sheet per account, matching the learner's existing Excel habit.
 - No longer deferred — pulled back into the PoC at the learner's request during `4-spec`.
+- Each sheet is named after the bank name and account type (e.g. "GT Current"), not the bank name alone — added during `5-build` final review once two same-bank accounts made the original naming ambiguous.
+- Each sheet leads with the account number (if set) and starting balance, then a running Balance column alongside each transaction — added during `5-build` final review so the exported sheet reads as a real ledger, not just a transaction list.
 
 ## States and Boundaries
 

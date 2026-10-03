@@ -86,6 +86,16 @@ Build mode: learn
 
 ## Final Review
 
+Kick-the-tires feedback from the learner, agreed fixes:
+
+- [ ] Replace plain "loading..." text with a visible loading spinner across pages
+- [ ] After adding a transaction, land back on that account's page instead of the Dashboard (matches edit/delete)
+- [ ] Show account type in the transaction form's account picker and at the top of the account page
+- [ ] Add an optional Account Number field to Account Setup; display it at the top of the account page
+- [ ] Export: name sheets using bank name + account type (e.g. "GT Current") instead of a generic "(2)" suffix
+- [ ] Export: add a running Balance column to each sheet, oldest-to-newest
+- [ ] Noted for later, not building now: a consolidated menu (Sign Out / Export / Edit are currently separate direct controls)
+
 - [ ] Final review complete — feedback resolved and learner confirms ready to ship
 
 ## Code Tour and App Map

@@ -103,6 +103,7 @@ For this PoC, with exactly one user, this single row is inserted directly (via t
 | id | uuid, primary key | default `gen_random_uuid()` |
 | user_id | uuid, foreign key → `profiles.id` | set to the signed-in user's id on insert |
 | bank_name | text | editable after creation |
+| account_number | text, nullable | optional, editable — added during `5-build` final review to disambiguate accounts that share a bank name and type |
 | account_type | text | `savings` \| `current` \| `domiciliary` — editable |
 | currency | text | `NGN` \| `USD` — editable |
 | category | text | `personal` \| `business` — editable |

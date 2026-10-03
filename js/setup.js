@@ -29,6 +29,7 @@ if (session) {
     pageTitle.textContent = 'Edit Account';
     saveButton.textContent = 'Save Changes';
     form.bank_name.value = account.bank_name;
+    form.account_number.value = account.account_number ?? '';
     form.account_type.value = account.account_type;
     form.currency.value = account.currency;
     form.category.value = account.category;
@@ -68,6 +69,7 @@ if (session) {
     balanceErrorEl.textContent = '';
 
     const bankName = form.bank_name.value.trim();
+    const accountNumber = form.account_number.value.trim();
     const accountType = form.account_type.value;
     const currency = form.currency.value;
     const category = form.category.value;
@@ -117,6 +119,7 @@ if (session) {
         .from('accounts')
         .update({
           bank_name: bankName,
+          account_number: accountNumber || null,
           account_type: accountType,
           currency,
           category,
@@ -136,6 +139,7 @@ if (session) {
     const { error } = await supabase.from('accounts').insert({
       user_id: session.user.id,
       bank_name: bankName,
+      account_number: accountNumber || null,
       account_type: accountType,
       currency,
       category,

@@ -13,6 +13,10 @@ function sanitizeSheetName(name, usedNames) {
   return finalName;
 }
 
+function capitalize(text) {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 export async function exportToExcel() {
   const { data: accounts, error: accountsError } = await supabase
     .from('accounts')
@@ -30,7 +34,8 @@ export async function exportToExcel() {
   const { data: transactions, error: txError } = await supabase
     .from('transactions')
     .select('*')
-    .order('date', { ascending: false });
+    .order('date', { ascending: true })
+    .order('created_at', { ascending: true });
 
   if (txError) {
     return { ok: false, reason: 'load-failed' };
@@ -41,15 +46,23 @@ export async function exportToExcel() {
 
   for (const account of accounts) {
     const accountTransactions = transactions.filter((tx) => tx.account_id === account.id);
-    const rows = accountTransactions.map((tx) => ({
-      Date: tx.date,
-      Type: tx.type,
-      Description: tx.description || '',
-      Amount: Number(tx.amount),
-    }));
 
-    const worksheet = XLSX.utils.json_to_sheet(rows, { header: ['Date', 'Type', 'Description', 'Amount'] });
-    const sheetName = sanitizeSheetName(account.bank_name, usedNames);
+    let runningBalance = Number(account.starting_balance);
+    const rows = accountTransactions.map((tx) => {
+      runningBalance += tx.type === 'inflow' ? Number(tx.amount) : -Number(tx.amount);
+      return [tx.date, tx.type, tx.description || '', Number(tx.amount), runningBalance];
+    });
+
+    const sheetData = [
+      ['Account Number:', account.account_number || '—'],
+      ['Starting Balance:', Number(account.starting_balance)],
+      [],
+      ['Date', 'Type', 'Description', 'Amount', 'Balance'],
+      ...rows,
+    ];
+
+    const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+    const sheetName = sanitizeSheetName(`${account.bank_name} ${capitalize(account.account_type)}`, usedNames);
     XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
   }
 

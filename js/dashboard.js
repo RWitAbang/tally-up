@@ -62,6 +62,10 @@ function computeBalances(accounts, transactions) {
   return balanceByAccount;
 }
 
+function capitalize(text) {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 function renderAccountRow(account, balance) {
   const row = document.createElement('a');
   row.className = 'account-row';
@@ -69,7 +73,7 @@ function renderAccountRow(account, balance) {
   row.innerHTML = `
     <div class="account-row-main">
       <span class="account-row-name">${account.bank_name}</span>
-      <span class="account-row-type">${account.account_type} · ${account.currency}</span>
+      <span class="account-row-type">${capitalize(account.account_type)} · ${account.currency}</span>
     </div>
     <div class="account-row-balance">${currencySymbol(account.currency)}${formatAmount(balance)}</div>
   `;

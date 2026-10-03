@@ -10,6 +10,22 @@
   box-sizing: border-box;
 }
 
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #e5ded5;
+  border-top-color: var(--raspberry);
+  border-radius: 50%;
+  margin: 16px auto;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 body {
   margin: 0;
   font-family: 'Nunito', sans-serif;
@@ -179,6 +195,12 @@ input, select {
 .account-balance strong {
   font-family: 'Fredoka', sans-serif;
   font-size: 1.5rem;
+}
+
+.account-meta {
+  margin: -8px 0 8px;
+  opacity: 0.7;
+  font-size: 0.9rem;
 }
 
 .empty-state {

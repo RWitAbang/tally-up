@@ -12,13 +12,14 @@ if (session) {
   const accountSelect = document.getElementById('account');
   const { data: accounts } = await supabase
     .from('accounts')
-    .select('id, bank_name')
+    .select('id, bank_name, account_type')
     .order('bank_name', { ascending: true });
 
   for (const account of accounts) {
     const option = document.createElement('option');
     option.value = account.id;
-    option.textContent = account.bank_name;
+    const typeLabel = account.account_type.charAt(0).toUpperCase() + account.account_type.slice(1);
+    option.textContent = `${account.bank_name} — ${typeLabel}`;
     accountSelect.appendChild(option);
   }
 
@@ -106,7 +107,7 @@ if (session) {
       return;
     }
 
-    window.location.href = 'dashboard.html';
+    window.location.href = `account.html?id=${accountId}`;
   });
 
   deleteButton.addEventListener('click', async () => {
@@ -126,8 +127,12 @@ if (session) {
   });
 
   document.getElementById('cancel').addEventListener('click', () => {
-    window.location.href = existingTransaction
-      ? `account.html?id=${existingTransaction.account_id}`
-      : 'dashboard.html';
+    if (existingTransaction) {
+      window.location.href = `account.html?id=${existingTransaction.account_id}`;
+    } else if (preselectedAccount) {
+      window.location.href = `account.html?id=${preselectedAccount}`;
+    } else {
+      window.location.href = 'dashboard.html';
+    }
   });
 }

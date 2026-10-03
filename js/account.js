@@ -10,6 +10,7 @@ if (session) {
 
   const statusEl = document.getElementById('status');
   const nameEl = document.getElementById('account-name');
+  const metaEl = document.getElementById('account-meta');
   const balanceSectionEl = document.getElementById('balance-section');
   const historyListEl = document.getElementById('history-list');
 
@@ -28,6 +29,9 @@ if (session) {
   } else {
     statusEl.textContent = '';
     nameEl.textContent = account.bank_name;
+
+    const typeLabel = account.account_type.charAt(0).toUpperCase() + account.account_type.slice(1);
+    metaEl.textContent = account.account_number ? `${typeLabel} · ${account.account_number}` : typeLabel;
 
     const symbol = account.currency === 'NGN' ? '₦' : '$';
     const balance =
