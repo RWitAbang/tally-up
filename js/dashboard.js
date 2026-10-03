@@ -7,7 +7,8 @@ const session = await requireSession();
 
 if (session) {
   const statusEl = document.getElementById('status');
-  const contentEl = document.getElementById('content');
+  const totalsEl = document.getElementById('totals');
+  const sectionsEl = document.getElementById('sections');
 
   const [{ data: accounts, error: accountsError }, { data: transactions, error: txError }] = await Promise.all([
     supabase.from('accounts').select('*').order('bank_name', { ascending: true }),
@@ -18,7 +19,7 @@ if (session) {
     statusEl.textContent = "couldn't load — try again";
   } else {
     statusEl.textContent = '';
-    renderDashboard(accounts, transactions, contentEl);
+    renderDashboard(accounts, transactions, totalsEl, sectionsEl);
   }
 
   document.getElementById('add-account').addEventListener('click', () => {
@@ -100,7 +101,7 @@ function renderSection(title, totals, accounts, balanceByAccount) {
   return section;
 }
 
-function renderDashboard(accounts, transactions, contentEl) {
+function renderDashboard(accounts, transactions, totalsEl, sectionsEl) {
   const balanceByAccount = computeBalances(accounts, transactions);
 
   const overallTotals = { NGN: 0, USD: 0 };
@@ -121,16 +122,14 @@ function renderDashboard(accounts, transactions, contentEl) {
     }
   }
 
-  contentEl.innerHTML = '';
-
-  const overall = document.createElement('div');
-  overall.className = 'overall-totals';
-  overall.innerHTML = `
-    <div class="overall-total"><span>Total Naira</span><strong>₦${formatAmount(overallTotals.NGN)}</strong></div>
-    <div class="overall-total"><span>Total Dollar</span><strong>$${formatAmount(overallTotals.USD)}</strong></div>
+  totalsEl.innerHTML = `
+    <div class="overall-totals">
+      <div class="overall-total"><span>Total Naira</span><strong>₦${formatAmount(overallTotals.NGN)}</strong></div>
+      <div class="overall-total"><span>Total Dollar</span><strong>$${formatAmount(overallTotals.USD)}</strong></div>
+    </div>
   `;
-  contentEl.appendChild(overall);
 
-  contentEl.appendChild(renderSection('Personal', personalTotals, personalAccounts, balanceByAccount));
-  contentEl.appendChild(renderSection('Business', businessTotals, businessAccounts, balanceByAccount));
+  sectionsEl.innerHTML = '';
+  sectionsEl.appendChild(renderSection('Personal', personalTotals, personalAccounts, balanceByAccount));
+  sectionsEl.appendChild(renderSection('Business', businessTotals, businessAccounts, balanceByAccount));
 }

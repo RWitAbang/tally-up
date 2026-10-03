@@ -198,9 +198,9 @@ input, select {
 }
 
 .account-meta {
-  margin: -8px 0 8px;
-  opacity: 0.7;
-  font-size: 0.9rem;
+  margin: 2px 0 0;
+  opacity: 0.6;
+  font-size: 0.85rem;
 }
 
 .empty-state {
@@ -289,6 +289,42 @@ button.secondary {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
+}
+
+.header-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.header-title h1 {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.account-type-inline {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  opacity: 0.55;
+}
+
+.icon-button {
+  width: auto;
+  margin-top: 0;
+  padding: 4px 8px;
+  background: none;
+  border: none;
+  color: var(--slate);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.icon-button:hover {
+  opacity: 0.7;
 }
 
 .sign-out-link {

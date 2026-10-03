@@ -115,7 +115,7 @@ For this PoC, with exactly one user, this single row is inserted directly (via t
 |---|---|---|
 | id | uuid, primary key | default `gen_random_uuid()` |
 | user_id | uuid, foreign key → `profiles.id` | set to the signed-in user's id on insert |
-| account_id | uuid, foreign key → `accounts.id` | |
+| account_id | uuid, foreign key → `accounts.id`, `on delete cascade` | deleting an account deletes its transactions too — a transaction without its account has no meaning in this app |
 | type | text | `expense` \| `inflow` |
 | date | date | defaults to today in the UI, editable |
 | description | text | |

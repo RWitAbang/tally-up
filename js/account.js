@@ -10,7 +10,7 @@ if (session) {
 
   const statusEl = document.getElementById('status');
   const nameEl = document.getElementById('account-name');
-  const metaEl = document.getElementById('account-meta');
+  const numberLineEl = document.getElementById('account-number-line');
   const balanceSectionEl = document.getElementById('balance-section');
   const historyListEl = document.getElementById('history-list');
 
@@ -28,10 +28,9 @@ if (session) {
     statusEl.textContent = "couldn't load — try again";
   } else {
     statusEl.textContent = '';
-    nameEl.textContent = account.bank_name;
-
     const typeLabel = account.account_type.charAt(0).toUpperCase() + account.account_type.slice(1);
-    metaEl.textContent = account.account_number ? `${typeLabel} · ${account.account_number}` : typeLabel;
+    nameEl.innerHTML = `${account.bank_name} <span class="account-type-inline">${typeLabel}</span>`;
+    numberLineEl.textContent = account.account_number || '';
 
     const symbol = account.currency === 'NGN' ? '₦' : '$';
     const balance =
