@@ -3,22 +3,21 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dashboard — Tally Up</title>
+  <title>Account — Tally Up</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
   <div class="card wide">
-    <div class="page-header">
-      <h1>Tally Up</h1>
-      <button id="sign-out" class="sign-out-link">Sign Out</button>
-    </div>
+    <h1 id="account-name">Account</h1>
     <p id="status">loading...</p>
-    <div id="content"></div>
+    <div id="balance-section"></div>
+    <h2>History</h2>
+    <div id="history-list"></div>
     <button id="add-transaction">Add Transaction</button>
-    <button id="add-account" class="secondary">Add Account</button>
+    <button id="back" class="secondary">Back to Dashboard</button>
   </div>
-  <script type="module" src="js/dashboard.js"></script>
+  <script type="module" src="js/account.js"></script>
 </body>
 </html>

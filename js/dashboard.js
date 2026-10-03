@@ -24,6 +24,10 @@ if (session) {
     window.location.href = 'setup.html';
   });
 
+  document.getElementById('add-transaction').addEventListener('click', () => {
+    window.location.href = 'transaction.html';
+  });
+
   document.getElementById('sign-out').addEventListener('click', async () => {
     await supabase.auth.signOut();
     window.location.href = 'sign-in.html';
@@ -48,8 +52,9 @@ function computeBalances(accounts, transactions) {
 }
 
 function renderAccountRow(account, balance) {
-  const row = document.createElement('div');
+  const row = document.createElement('a');
   row.className = 'account-row';
+  row.href = `account.html?id=${account.id}`;
   row.innerHTML = `
     <div class="account-row-main">
       <span class="account-row-name">${account.bank_name}</span>

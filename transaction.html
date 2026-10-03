@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Add Transaction — Tally Up</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="card">
+    <h1>Add Transaction</h1>
+    <form id="transaction-form">
+      <label for="account">Account</label>
+      <select id="account" name="account" required></select>
+
+      <label>Type</label>
+      <div class="type-toggle">
+        <label><input type="radio" name="type" value="expense" checked /> Expense</label>
+        <label><input type="radio" name="type" value="inflow" /> Inflow</label>
+      </div>
+
+      <label for="date">Date</label>
+      <input type="date" id="date" name="date" required />
+
+      <label for="description">Description</label>
+      <input type="text" id="description" name="description" placeholder="e.g. groceries" />
+
+      <label for="amount">Amount</label>
+      <input type="text" inputmode="decimal" id="amount" name="amount" placeholder="0.00" />
+      <p class="error" id="amount-error"></p>
+
+      <button type="submit">Save Transaction</button>
+      <button type="button" id="cancel" class="secondary">Cancel</button>
+      <p class="error" id="error"></p>
+    </form>
+  </div>
+  <script type="module" src="js/transaction.js"></script>
+</body>
+</html>

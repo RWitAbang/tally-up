@@ -39,7 +39,7 @@ Build mode: learn
   Learner check: Check the dashboard's totals against your own quick mental sum of the test accounts.
   Commit: `Compute dashboard totals grouped by currency and personal/business`
 
-- [ ] **4. Log a transaction and watch balances update**
+- [x] **4. Log a transaction and watch balances update**
   Becomes usable: The core loop this whole app exists for — log an expense or inflow and see it reflected immediately.
   Why now: This is the single behavior the kernel is built around; everything before this slice was setup for it.
   PRD ref: `prd.md > Logging a transaction`, `prd.md > Add / Edit / Delete Transaction` (add path), `prd.md > Missing or zero amount`, `prd.md > Empty transaction history`
