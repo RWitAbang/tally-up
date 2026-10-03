@@ -1,6 +1,7 @@
 import { supabase } from './supabase-client.js';
 import { requireSession } from './auth-guard.js';
 import { formatAmount } from './currency.js';
+import { exportToExcel } from './export.js';
 
 const session = await requireSession();
 
@@ -31,6 +32,16 @@ if (session) {
   document.getElementById('sign-out').addEventListener('click', async () => {
     await supabase.auth.signOut();
     window.location.href = 'sign-in.html';
+  });
+
+  const exportStatusEl = document.getElementById('export-status');
+  document.getElementById('export').addEventListener('click', async () => {
+    exportStatusEl.textContent = '';
+    const result = await exportToExcel();
+    if (!result.ok) {
+      exportStatusEl.textContent =
+        result.reason === 'no-accounts' ? 'add an account first' : "couldn't export — try again";
+    }
   });
 }
 

@@ -69,7 +69,7 @@ Build mode: learn
   Learner check: Edit one of your test accounts' details and confirm the change shows up on the dashboard.
   Commit: `Add account editing`
 
-- [ ] **7. Get your data out: export to Excel**
+- [x] **7. Get your data out: export to Excel**
   Becomes usable: A real `.xlsx` download, one sheet per account — the other half of the unique kernel, the promise that this tracker never locks your data in.
   Why now: Last, because it reads everything the rest of the app produces; building it earlier would mean exporting against fake or incomplete data.
   PRD ref: `prd.md > Export to Excel`
