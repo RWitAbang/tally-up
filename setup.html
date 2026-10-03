@@ -10,7 +10,7 @@
 </head>
 <body>
   <div class="card">
-    <h1>Add an Account</h1>
+    <h1 id="page-title">Add an Account</h1>
     <div id="form-section">
       <form id="setup-form">
         <label for="bank_name">Bank Name</label>
@@ -39,7 +39,7 @@
         <input type="text" inputmode="decimal" id="starting_balance" name="starting_balance" placeholder="0.00" />
         <p class="error" id="balance-error"></p>
 
-        <button type="submit">Save Account</button>
+        <button type="submit" id="save-button">Save Account</button>
         <button type="button" id="cancel" class="secondary" hidden>Cancel</button>
         <p class="error" id="error"></p>
       </form>

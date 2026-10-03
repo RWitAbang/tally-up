@@ -59,7 +59,7 @@ Build mode: learn
   Learner check: Tap a transaction you logged, change its amount, save, and confirm the balance is right — then delete a test transaction.
   Commit: `Add transaction editing and deletion`
 
-- [ ] **6. Fix a mistake in an account's own details**
+- [x] **6. Fix a mistake in an account's own details**
   Becomes usable: Correcting a mistyped bank name, currency, category, or starting balance after an account already exists.
   Why now: The smaller, lower-risk half of "editable after creation," built once the transaction edit/delete pattern already exists to reuse.
   PRD ref: `prd.md > Account Setup > Account details can be edited`

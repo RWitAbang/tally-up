@@ -69,4 +69,8 @@ if (session) {
   document.getElementById('back').addEventListener('click', () => {
     window.location.href = 'dashboard.html';
   });
+
+  document.getElementById('edit-account').addEventListener('click', () => {
+    window.location.href = `setup.html?account=${accountId}`;
+  });
 }

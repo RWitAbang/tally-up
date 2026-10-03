@@ -5,22 +5,47 @@ import { formatAmount, parseAmount, attachLiveAmountFormatting } from './currenc
 const session = await requireSession();
 
 if (session) {
+  const params = new URLSearchParams(window.location.search);
+  const editingAccountId = params.get('account');
+
   const form = document.getElementById('setup-form');
   const formSection = document.getElementById('form-section');
   const confirmSection = document.getElementById('confirm-section');
   const errorEl = document.getElementById('error');
   const balanceInput = document.getElementById('starting_balance');
   const balanceErrorEl = document.getElementById('balance-error');
+  const pageTitle = document.getElementById('page-title');
+  const saveButton = document.getElementById('save-button');
+  const cancelButton = document.getElementById('cancel');
 
   attachLiveAmountFormatting(balanceInput);
 
-  const { count } = await supabase.from('accounts').select('id', { count: 'exact', head: true });
-  if (count > 0) {
-    const cancelButton = document.getElementById('cancel');
+  let existingAccount = null;
+
+  if (editingAccountId) {
+    const { data: account } = await supabase.from('accounts').select('*').eq('id', editingAccountId).single();
+    existingAccount = account;
+
+    pageTitle.textContent = 'Edit Account';
+    saveButton.textContent = 'Save Changes';
+    form.bank_name.value = account.bank_name;
+    form.account_type.value = account.account_type;
+    form.currency.value = account.currency;
+    form.category.value = account.category;
+    balanceInput.value = formatAmount(account.starting_balance);
+
     cancelButton.hidden = false;
     cancelButton.addEventListener('click', () => {
-      window.location.href = 'dashboard.html';
+      window.location.href = `account.html?id=${editingAccountId}`;
     });
+  } else {
+    const { count } = await supabase.from('accounts').select('id', { count: 'exact', head: true });
+    if (count > 0) {
+      cancelButton.hidden = false;
+      cancelButton.addEventListener('click', () => {
+        window.location.href = 'dashboard.html';
+      });
+    }
   }
 
   balanceInput.addEventListener('blur', () => {
@@ -63,7 +88,7 @@ if (session) {
     }
 
     const escapedBankName = bankName.replace(/[%_]/g, '\\$&');
-    const { data: matches } = await supabase
+    let dupQuery = supabase
       .from('accounts')
       .select('id')
       .ilike('bank_name', escapedBankName)
@@ -71,13 +96,41 @@ if (session) {
       .eq('currency', currency)
       .eq('category', category);
 
+    if (existingAccount) {
+      dupQuery = dupQuery.neq('id', existingAccount.id);
+    }
+
+    const { data: matches } = await dupQuery;
+
     if (matches && matches.length > 0) {
       const proceed = window.confirm(
-        `You already have a ${category} ${accountType} account at ${bankName} in ${currency}. Add another one anyway?`
+        `You already have a ${category} ${accountType} account at ${bankName} in ${currency}. ` +
+          (existingAccount ? 'Save anyway?' : 'Add another one anyway?')
       );
       if (!proceed) {
         return;
       }
+    }
+
+    if (existingAccount) {
+      const { error } = await supabase
+        .from('accounts')
+        .update({
+          bank_name: bankName,
+          account_type: accountType,
+          currency,
+          category,
+          starting_balance: startingBalance,
+        })
+        .eq('id', existingAccount.id);
+
+      if (error) {
+        errorEl.textContent = "couldn't save — try again";
+        return;
+      }
+
+      window.location.href = `account.html?id=${existingAccount.id}`;
+      return;
     }
 
     const { error } = await supabase.from('accounts').insert({
