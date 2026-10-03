@@ -17,7 +17,8 @@ export function attachLiveAmountFormatting(inputEl) {
   inputEl.addEventListener('input', () => {
     const prevValue = inputEl.value;
     const cursorPos = inputEl.selectionStart;
-    const digitsBeforeCursor = prevValue.slice(0, cursorPos).replace(/[^0-9]/g, '').length;
+    const dotIndexPrev = prevValue.indexOf('.');
+    const isAfterDot = dotIndexPrev !== -1 && cursorPos > dotIndexPrev;
 
     let raw = prevValue.replace(/[^0-9.]/g, '');
     const firstDot = raw.indexOf('.');
@@ -41,17 +42,32 @@ export function attachLiveAmountFormatting(inputEl) {
 
     inputEl.value = newValue;
 
-    let count = 0;
-    let newPos = newValue.length;
-    if (digitsBeforeCursor === 0) {
-      newPos = 0;
+    let newPos;
+    if (isAfterDot) {
+      // Cursor was in (or right after) the decimal part — keep it there,
+      // relative to how many decimal digits come before it.
+      let decimalDigitsBeforeCursor = prevValue
+        .slice(dotIndexPrev + 1, cursorPos)
+        .replace(/[^0-9]/g, '').length;
+      const decimalDigitsInNew = decPart !== undefined ? decPart.length : 0;
+      decimalDigitsBeforeCursor = Math.min(decimalDigitsBeforeCursor, decimalDigitsInNew);
+      const dotIndexNew = newValue.indexOf('.');
+      newPos = dotIndexNew + 1 + decimalDigitsBeforeCursor;
     } else {
-      for (let i = 0; i < newValue.length; i++) {
-        if (/[0-9]/.test(newValue[i])) {
-          count++;
-          if (count === digitsBeforeCursor) {
-            newPos = i + 1;
-            break;
+      // Cursor was in the integer part (or there's no decimal point yet).
+      const digitsBeforeCursor = prevValue.slice(0, cursorPos).replace(/[^0-9]/g, '').length;
+      if (digitsBeforeCursor === 0) {
+        newPos = 0;
+      } else {
+        newPos = newValue.length;
+        let count = 0;
+        for (let i = 0; i < newValue.length; i++) {
+          if (/[0-9]/.test(newValue[i])) {
+            count++;
+            if (count === digitsBeforeCursor) {
+              newPos = i + 1;
+              break;
+            }
           }
         }
       }

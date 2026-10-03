@@ -14,6 +14,15 @@ if (session) {
 
   attachLiveAmountFormatting(balanceInput);
 
+  const { count } = await supabase.from('accounts').select('id', { count: 'exact', head: true });
+  if (count > 0) {
+    const cancelButton = document.getElementById('cancel');
+    cancelButton.hidden = false;
+    cancelButton.addEventListener('click', () => {
+      window.location.href = 'dashboard.html';
+    });
+  }
+
   balanceInput.addEventListener('blur', () => {
     if (balanceInput.value.trim() === '') {
       balanceErrorEl.textContent = '';

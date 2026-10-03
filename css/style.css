@@ -159,6 +159,33 @@ button:hover {
   opacity: 0.9;
 }
 
+button.secondary {
+  background: transparent;
+  color: var(--slate);
+  border: 2px solid #e5ded5;
+  margin-top: 10px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sign-out-link {
+  background: none;
+  border: none;
+  color: var(--slate);
+  opacity: 0.7;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.85rem;
+  width: auto;
+  margin-top: 0;
+  padding: 4px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .error {
   color: var(--raspberry);
   margin-top: 12px;

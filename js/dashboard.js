@@ -23,6 +23,11 @@ if (session) {
   document.getElementById('add-account').addEventListener('click', () => {
     window.location.href = 'setup.html';
   });
+
+  document.getElementById('sign-out').addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    window.location.href = 'sign-in.html';
+  });
 }
 
 function currencySymbol(code) {
