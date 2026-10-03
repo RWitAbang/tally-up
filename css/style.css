@@ -33,6 +33,83 @@ h1, h2, button {
   box-shadow: 0 4px 16px rgba(55, 80, 92, 0.1);
 }
 
+.card.wide {
+  max-width: 480px;
+}
+
+.overall-totals {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.overall-total {
+  flex: 1;
+  background: var(--raspberry);
+  color: white;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.overall-total span {
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+.overall-total strong {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.3rem;
+}
+
+.dashboard-section {
+  margin-top: 28px;
+}
+
+.dashboard-section h2 {
+  margin: 0 0 4px;
+  font-size: 1.1rem;
+}
+
+.section-subtotals {
+  display: flex;
+  gap: 16px;
+  color: var(--slate);
+  opacity: 0.75;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.account-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.account-row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.account-row-name {
+  font-weight: 700;
+}
+
+.account-row-type {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  text-transform: capitalize;
+}
+
+.account-row-balance {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 label {
   display: block;
   margin-top: 16px;

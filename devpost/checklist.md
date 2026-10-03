@@ -29,7 +29,7 @@ Build mode: learn
   Learner check: Add your real bank accounts on your phone, one at a time, and watch them appear in the list.
   Commit: `Add account setup flow and basic dashboard listing`
 
-- [ ] **3. See your real totals at a glance**
+- [x] **3. See your real totals at a glance**
   Becomes usable: The actual "at a glance" dashboard — overall totals plus Personal and Business sections, each broken out by currency.
   Why now: This is the first screen you'll look at most, and it's one of the two things Mint and other wallet apps never got right for you.
   PRD ref: `prd.md > Dashboard`
