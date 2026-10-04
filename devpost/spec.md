@@ -53,6 +53,7 @@ PRD ref: `prd.md > The Core Journey`.
 ## Look and Feel
 
 - **Palette** (from `prd.md > Look and Feel`): `#B8336A` raspberry pink, `#F2AF29` golden orange, `#70B77E` sage green, `#05B2DC` sky blue, `#37505C` dark slate for text/contrast.
+- **Revised during `5-build` final review:** the learner felt the app was reading as too colorful and asked for minimal and classy instead of "colorful and playful." Resolved as: one signature accent (raspberry) for primary actions, sky blue reserved for the totals/balance blocks and all hover states (a deliberate cool-vs-warm contrast, chosen over orange which would compete with raspberry as a second warm hue), sage for inflow amounts, raspberry for expense amounts, and everything else — backgrounds, borders, body text — stays white, cream, or slate. Orange and multi-color treatments (e.g. a multi-colored wordmark) were considered and explicitly declined. No invented off-palette shades (an earlier darkened-raspberry hover was replaced with literal sky).
 - **Typography:** Fredoka for headings and buttons (rounded, playful); Nunito for body copy and all monetary amounts (friendly but legible for numbers).
 - **Icons:** Phosphor Icons, fill style, colored from the palette above rather than left default black/gray.
 - **Density and tone:** spacious and calm on the Dashboard (it's the screen you'll look at most), slightly denser on Account Detail (it's a list by nature). Interface copy stays plain and warm ("add another account?" not "register additional account").
@@ -104,7 +105,7 @@ For this PoC, with exactly one user, this single row is inserted directly (via t
 | user_id | uuid, foreign key → `profiles.id` | set to the signed-in user's id on insert |
 | bank_name | text | editable after creation |
 | account_number | text, nullable | optional, editable — added during `5-build` final review to disambiguate accounts that share a bank name and type |
-| account_type | text | `savings` \| `current` \| `domiciliary` — editable |
+| account_type | text | `savings` \| `current` \| `domiciliary` \| `utility_card` \| `domiciliary_card` — editable. The last two added during `5-build` final review. |
 | currency | text | `NGN` \| `USD` — editable |
 | category | text | `personal` \| `business` — editable |
 | starting_balance | numeric | default `0`, editable |
@@ -139,16 +140,20 @@ tally-up/
 ├── dashboard.html        # totals + Personal/Business sections, Export button
 ├── account.html          # one account's balance + history (?id=)
 ├── transaction.html      # add/edit a transaction (?account=&transaction=)
+├── account-settings.html # edit the signed-in user's name, surname, email, password
+├── 404.html              # Netlify's automatic fallback for any unmatched route
 ├── css/
 │   └── style.css         # palette, Fredoka/Nunito, layout
 ├── js/
 │   ├── supabase-client.js  # Supabase URL + key, shared client
-│   ├── auth-guard.js       # redirects to sign-in.html if no session
+│   ├── auth-guard.js       # redirects to sign-in.html if no session; syncs profiles.email from Auth
 │   ├── sign-in.js
 │   ├── setup.js             # account add AND edit (reads ?account= to switch mode)
 │   ├── dashboard.js
-│   ├── account.js
+│   ├── account.js           # includes transaction-history pagination (10/page)
 │   ├── transaction.js
+│   ├── account-settings.js
+│   ├── account-types.js     # shared account_type → display label map
 │   └── export.js            # builds the .xlsx workbook with SheetJS, triggers download
 └── devpost/              # Devpost learning workspace
 ```

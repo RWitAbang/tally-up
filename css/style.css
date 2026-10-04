@@ -40,6 +40,12 @@ h1, h2, button {
   font-family: 'Fredoka', sans-serif;
 }
 
+h1 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0;
+}
+
 .card {
   width: 100%;
   max-width: 400px;
@@ -61,7 +67,7 @@ h1, h2, button {
 
 .overall-total {
   flex: 1;
-  background: var(--raspberry);
+  background: var(--sky);
   color: white;
   border-radius: 12px;
   padding: 16px;
@@ -121,6 +127,11 @@ h1, h2, button {
   text-transform: capitalize;
 }
 
+.account-row-number {
+  font-size: 0.8rem;
+  opacity: 0.6;
+}
+
 .account-row-balance {
   font-weight: 700;
   white-space: nowrap;
@@ -178,7 +189,7 @@ input, select {
 
 .account-balance {
   margin-top: 8px;
-  background: var(--raspberry);
+  background: var(--sky);
   color: white;
   border-radius: 12px;
   padding: 16px;
@@ -198,9 +209,11 @@ input, select {
 }
 
 .account-meta {
-  margin: 2px 0 0;
+  font-family: 'Fredoka', sans-serif;
+  margin: 3px 0 0;
   opacity: 0.6;
-  font-size: 0.85rem;
+  font-size: 1rem;
+  font-weight: 500;
 }
 
 .empty-state {
@@ -275,7 +288,19 @@ button {
 }
 
 button:hover {
-  opacity: 0.9;
+  background: var(--sky);
+}
+
+button:disabled,
+button:disabled:hover {
+  opacity: 0.6;
+  cursor: default;
+  background: var(--raspberry);
+}
+
+button.secondary:hover {
+  background: rgba(5, 178, 220, 0.1);
+  border-color: var(--sky);
 }
 
 button.secondary {
@@ -305,16 +330,16 @@ button.secondary {
 }
 
 .account-type-inline {
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 700;
-  opacity: 0.55;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+  opacity: 0.6;
 }
 
 .icon-button {
   width: auto;
   margin-top: 0;
-  padding: 4px 8px;
+  padding: 4px 8px 4px 0;
   background: none;
   border: none;
   color: var(--slate);
@@ -324,7 +349,8 @@ button.secondary {
 }
 
 .icon-button:hover {
-  opacity: 0.7;
+  background: none;
+  color: var(--raspberry);
 }
 
 .sign-out-link {
@@ -341,8 +367,121 @@ button.secondary {
   cursor: pointer;
 }
 
+.sign-out-link:hover {
+  background: none;
+  color: var(--raspberry);
+  opacity: 1;
+}
+
+.header-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.hint {
+  color: var(--sky);
+  margin-top: 8px;
+  font-size: 0.9rem;
+}
+
+.success {
+  color: var(--sage);
+  margin-top: 12px;
+  font-weight: 600;
+}
+
 .error {
   color: var(--raspberry);
   margin-top: 12px;
   min-height: 1.2em;
+}
+
+.pagination {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.pagination button {
+  width: auto;
+  margin-top: 0;
+  padding: 6px 11px;
+  font-size: 0.85rem;
+  background: transparent;
+  border: 1px solid #e5ded5;
+  color: var(--slate);
+}
+
+.pagination button:hover {
+  background: rgba(5, 178, 220, 0.1);
+  border-color: var(--sky);
+}
+
+.pagination button.active {
+  background: var(--raspberry);
+  border-color: var(--raspberry);
+  color: white;
+}
+
+.pagination button.active:hover {
+  background: var(--raspberry);
+}
+
+.pagination button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.pagination button:disabled:hover {
+  background: transparent;
+  border-color: #e5ded5;
+}
+
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(55, 80, 92, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 1000;
+}
+
+.confirm-box {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 340px;
+  width: 100%;
+  box-shadow: 0 8px 24px rgba(55, 80, 92, 0.2);
+}
+
+.confirm-message {
+  margin: 0 0 20px;
+  color: var(--slate);
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.confirm-actions button {
+  flex: 1;
+  width: auto;
+  margin-top: 0;
+}
+
+.confirm-destructive {
+  background: var(--raspberry);
+  color: white;
+  border: none;
 }

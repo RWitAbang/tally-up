@@ -11,9 +11,10 @@
 <body>
   <div class="card">
     <h1 id="page-title">Add Transaction</h1>
-    <form id="transaction-form">
+    <div id="status"><div class="spinner"></div></div>
+    <form id="transaction-form" hidden>
       <label for="account">Account</label>
-      <select id="account" name="account" required></select>
+      <select id="account" name="account"></select>
 
       <label>Type</label>
       <div class="type-toggle">

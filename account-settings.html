@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Account Settings — Tally Up</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/fill/style.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="card">
+    <div class="page-header">
+      <button id="back" class="icon-button" aria-label="Back to Dashboard"><i class="ph-fill ph-arrow-left"></i></button>
+      <h1>Account Settings</h1>
+    </div>
+    <div id="status"><div class="spinner"></div></div>
+    <form id="settings-form" hidden>
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" required />
+
+      <label for="surname">Surname</label>
+      <input type="text" id="surname" name="surname" required />
+
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required />
+      <p class="hint" id="email-hint"></p>
+
+      <label for="new_password">New Password (leave blank to keep current)</label>
+      <input type="password" id="new_password" name="new_password" placeholder="At least 6 characters" />
+      <p class="error" id="password-error"></p>
+
+      <button type="submit" id="save-button">Save Changes</button>
+      <p class="error" id="error"></p>
+      <p class="success" id="success"></p>
+    </form>
+  </div>
+  <script type="module" src="js/account-settings.js"></script>
+</body>
+</html>

@@ -11,19 +11,22 @@
 <body>
   <div class="card">
     <h1 id="page-title">Add an Account</h1>
+    <div id="status"></div>
     <div id="form-section">
       <form id="setup-form">
         <label for="bank_name">Bank Name</label>
         <input type="text" id="bank_name" name="bank_name" required />
 
         <label for="account_number">Account Number (optional)</label>
-        <input type="text" id="account_number" name="account_number" placeholder="e.g. 0123456789" />
+        <input type="text" inputmode="numeric" id="account_number" name="account_number" placeholder="e.g. 0123456789" />
 
         <label for="account_type">Account Type</label>
         <select id="account_type" name="account_type">
           <option value="savings">Savings</option>
           <option value="current">Current</option>
           <option value="domiciliary">Domiciliary</option>
+          <option value="utility_card">Utility Card</option>
+          <option value="domiciliary_card">Domiciliary Card</option>
         </select>
 
         <label for="currency">Currency</label>
@@ -43,6 +46,7 @@
         <p class="error" id="balance-error"></p>
 
         <button type="submit" id="save-button">Save Account</button>
+        <button type="button" id="delete-account" class="secondary" hidden>Delete Account</button>
         <button type="button" id="cancel" class="secondary" hidden>Cancel</button>
         <p class="error" id="error"></p>
       </form>

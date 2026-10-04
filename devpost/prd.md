@@ -40,7 +40,7 @@ Minimal and clean, but colorful and playful — not sterile, not a bare spreadsh
 - Kept as its own piece of data, separate from bank accounts, so a future version could let more than one person set up their own profile without changing how bank accounts or transactions work.
 
 ### Account Setup
-- Fields per account: Bank Name, Account Number (optional), Account Type (savings, current, or domiciliary), Currency (Naira or Dollar), Personal or Business, Starting Balance (optional, defaults to 0).
+- Fields per account: Bank Name, Account Number (optional), Account Type (savings, current, domiciliary, utility card, or domiciliary card), Currency (Naira or Dollar), Personal or Business, Starting Balance (optional, defaults to 0).
 - One account at a time, looping with "add another account?" until declined — so someone with 2 accounts isn't stuck filling out a form sized for 9.
 - Available on first open (forced, until at least one account exists) and afterward on demand via "Add Account" on the Dashboard.
 - **Account details can be edited after creation** — Bank Name, Account Number, Account Type, Currency, Personal/Business, and Starting Balance are all editable later, not just at setup.
@@ -56,7 +56,7 @@ Minimal and clean, but colorful and playful — not sterile, not a bare spreadsh
 ### Account Detail
 - Account type and account number (if set) shown just below the bank name, so it's always clear which account you're looking at.
 - Current balance at the top.
-- Full transaction history below, newest transaction first.
+- Full transaction history below, newest transaction first. Once a history passes 10 entries, it's paginated — 10 per page, numbered page buttons plus prev/next, and swipe left/right between pages — added during `5-build` final review so a long history doesn't mean endless scrolling.
 - Tapping a transaction opens Edit/Delete for it.
 
 ### Add / Edit / Delete Transaction

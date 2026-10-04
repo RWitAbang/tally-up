@@ -2,6 +2,7 @@ import { supabase } from './supabase-client.js';
 import { requireSession } from './auth-guard.js';
 import { formatAmount } from './currency.js';
 import { exportToExcel } from './export.js';
+import { accountTypeLabel } from './account-types.js';
 
 const session = await requireSession();
 
@@ -37,6 +38,10 @@ if (session) {
     window.location.href = 'sign-in.html';
   });
 
+  document.getElementById('account-settings').addEventListener('click', () => {
+    window.location.href = 'account-settings.html';
+  });
+
   const exportStatusEl = document.getElementById('export-status');
   document.getElementById('export').addEventListener('click', async () => {
     exportStatusEl.textContent = '';
@@ -65,10 +70,6 @@ function computeBalances(accounts, transactions) {
   return balanceByAccount;
 }
 
-function capitalize(text) {
-  return text.charAt(0).toUpperCase() + text.slice(1);
-}
-
 function renderAccountRow(account, balance) {
   const row = document.createElement('a');
   row.className = 'account-row';
@@ -76,7 +77,8 @@ function renderAccountRow(account, balance) {
   row.innerHTML = `
     <div class="account-row-main">
       <span class="account-row-name">${account.bank_name}</span>
-      <span class="account-row-type">${capitalize(account.account_type)} · ${account.currency}</span>
+      <span class="account-row-type">${accountTypeLabel(account.account_type)} · ${account.currency}</span>
+      ${account.account_number ? `<span class="account-row-number">${account.account_number}</span>` : ''}
     </div>
     <div class="account-row-balance">${currencySymbol(account.currency)}${formatAmount(balance)}</div>
   `;
@@ -96,8 +98,15 @@ function renderSection(title, totals, accounts, balanceByAccount) {
   subtotals.innerHTML = `<span>₦${formatAmount(totals.NGN)}</span><span>$${formatAmount(totals.USD)}</span>`;
   section.appendChild(subtotals);
 
-  for (const account of accounts) {
-    section.appendChild(renderAccountRow(account, balanceByAccount.get(account.id) ?? 0));
+  if (accounts.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'empty-state';
+    empty.textContent = `no ${title.toLowerCase()} accounts yet`;
+    section.appendChild(empty);
+  } else {
+    for (const account of accounts) {
+      section.appendChild(renderAccountRow(account, balanceByAccount.get(account.id) ?? 0));
+    }
   }
 
   return section;
