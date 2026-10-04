@@ -1,7 +1,10 @@
 import { supabase } from './supabase-client.js';
 import { requireSession } from './auth-guard.js';
-import { formatAmount } from './currency.js';
+import { formatAmount, formatSignedAmount, currencySymbol } from './currency.js';
 import { accountTypeLabel } from './account-types.js';
+import { fitText } from './fit-text.js';
+import { createPaginatedList } from './pagination.js';
+import { formatDateFriendly } from './date-utils.js';
 
 const PAGE_SIZE = 10;
 
@@ -16,6 +19,7 @@ if (session) {
   const nameEl = document.getElementById('account-name');
   const numberLineEl = document.getElementById('account-number-line');
   const balanceSectionEl = document.getElementById('balance-section');
+  const startingBalanceRowEl = document.getElementById('starting-balance-row');
   const historyListEl = document.getElementById('history-list');
 
   const [{ data: account, error: accountError }, { data: transactions, error: txError }] = await Promise.all([
@@ -37,23 +41,39 @@ if (session) {
     nameEl.innerHTML = `${account.bank_name} <span class="account-type-inline">${typeLabel}</span>`;
     numberLineEl.textContent = account.account_number || '';
 
-    const symbol = account.currency === 'NGN' ? '₦' : '$';
+    const symbol = currencySymbol(account.currency);
     const balance =
       Number(account.starting_balance) +
       transactions.reduce((sum, tx) => sum + (tx.type === 'inflow' ? Number(tx.amount) : -Number(tx.amount)), 0);
 
     balanceSectionEl.innerHTML = `
-      <div class="account-balance">
+      <div class="account-balance ${balance < 0 ? 'negative-balance' : ''}">
         <span>Current Balance</span>
-        <strong>${symbol}${formatAmount(balance)}</strong>
+        <strong>${formatSignedAmount(symbol, balance)}</strong>
+      </div>
+    `;
+    fitText(balanceSectionEl.querySelector('.account-balance strong'), { max: 1.5 });
+
+    startingBalanceRowEl.innerHTML = `
+      <div class="transaction-row starting-balance-row">
+        <div class="transaction-row-main">
+          <span class="transaction-row-desc">Starting Balance</span>
+          <span class="transaction-row-date">${formatDateFriendly(account.created_at.slice(0, 10))}</span>
+        </div>
+        <span class="transaction-row-amount">${formatSignedAmount(symbol, account.starting_balance)}</span>
       </div>
     `;
 
-    if (transactions.length === 0) {
-      historyListEl.innerHTML = '<p class="empty-state">no transactions yet</p>';
-    } else {
-      setUpHistoryPaging(transactions, accountId, symbol);
-    }
+    createPaginatedList({
+      listEl: historyListEl,
+      paginationEl: document.getElementById('pagination'),
+      items: transactions,
+      pageSize: PAGE_SIZE,
+      renderItem: (tx) => renderTransactionRow(tx, accountId, symbol),
+      onEmpty: (el) => {
+        el.innerHTML = '<p class="empty-state">no transactions yet</p>';
+      },
+    });
   }
 
   document.getElementById('add-transaction').addEventListener('click', () => {
@@ -69,76 +89,17 @@ if (session) {
   });
 }
 
-function setUpHistoryPaging(transactions, accountId, symbol) {
-  const historyListEl = document.getElementById('history-list');
-  const paginationEl = document.getElementById('pagination');
-  const totalPages = Math.ceil(transactions.length / PAGE_SIZE);
-  let currentPage = 1;
-
-  function renderPage(page) {
-    currentPage = page;
-
-    historyListEl.innerHTML = '';
-    const start = (page - 1) * PAGE_SIZE;
-    const pageItems = transactions.slice(start, start + PAGE_SIZE);
-    for (const tx of pageItems) {
-      const row = document.createElement('a');
-      row.className = 'transaction-row';
-      row.href = `transaction.html?account=${accountId}&transaction=${tx.id}`;
-      const sign = tx.type === 'inflow' ? '+' : '−';
-      row.innerHTML = `
-        <div class="transaction-row-main">
-          <span class="transaction-row-desc">${tx.description || '(no description)'}</span>
-          <span class="transaction-row-date">${tx.date}</span>
-        </div>
-        <span class="transaction-row-amount ${tx.type}">${sign}${symbol}${formatAmount(tx.amount)}</span>
-      `;
-      historyListEl.appendChild(row);
-    }
-
-    renderPagination();
-  }
-
-  function renderPagination() {
-    paginationEl.innerHTML = '';
-    if (totalPages <= 1) return;
-
-    const prevBtn = document.createElement('button');
-    prevBtn.textContent = '←';
-    prevBtn.className = 'page-nav';
-    prevBtn.disabled = currentPage === 1;
-    prevBtn.addEventListener('click', () => renderPage(currentPage - 1));
-    paginationEl.appendChild(prevBtn);
-
-    for (let i = 1; i <= totalPages; i++) {
-      const pageBtn = document.createElement('button');
-      pageBtn.textContent = String(i);
-      pageBtn.className = 'page-number' + (i === currentPage ? ' active' : '');
-      pageBtn.addEventListener('click', () => renderPage(i));
-      paginationEl.appendChild(pageBtn);
-    }
-
-    const nextBtn = document.createElement('button');
-    nextBtn.textContent = '→';
-    nextBtn.className = 'page-nav';
-    nextBtn.disabled = currentPage === totalPages;
-    nextBtn.addEventListener('click', () => renderPage(currentPage + 1));
-    paginationEl.appendChild(nextBtn);
-  }
-
-  let touchStartX = 0;
-  historyListEl.addEventListener('touchstart', (event) => {
-    touchStartX = event.changedTouches[0].screenX;
-  });
-  historyListEl.addEventListener('touchend', (event) => {
-    const diff = touchStartX - event.changedTouches[0].screenX;
-    if (Math.abs(diff) < 50) return;
-    if (diff > 0 && currentPage < totalPages) {
-      renderPage(currentPage + 1);
-    } else if (diff < 0 && currentPage > 1) {
-      renderPage(currentPage - 1);
-    }
-  });
-
-  renderPage(1);
+function renderTransactionRow(tx, accountId, symbol) {
+  const row = document.createElement('a');
+  row.className = 'transaction-row';
+  row.href = `transaction.html?account=${accountId}&transaction=${tx.id}`;
+  const sign = tx.type === 'inflow' ? '+' : '−';
+  row.innerHTML = `
+    <div class="transaction-row-main">
+      <span class="transaction-row-desc">${tx.description || '(no description)'}</span>
+      <span class="transaction-row-date">${formatDateFriendly(tx.date)}</span>
+    </div>
+    <span class="transaction-row-amount ${tx.type}">${sign}${symbol}${formatAmount(tx.amount)}</span>
+  `;
+  return row;
 }

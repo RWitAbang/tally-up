@@ -1,7 +1,26 @@
+export const CURRENCIES = ['NGN', 'USD', 'GBP'];
+
+const CURRENCY_LABELS = { NGN: 'Naira', USD: 'Dollar', GBP: 'Pound' };
+const CURRENCY_SYMBOLS = { NGN: '₦', USD: '$', GBP: '£' };
+
+export function currencyLabel(code) {
+  return CURRENCY_LABELS[code] || code;
+}
+
+export function currencySymbol(code) {
+  return CURRENCY_SYMBOLS[code] || code;
+}
+
 export function formatAmount(value) {
   const num = Number(value);
   if (Number.isNaN(num)) return '';
   return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+export function formatSignedAmount(symbol, value) {
+  const num = Number(value);
+  if (Number.isNaN(num)) return '';
+  return `${num < 0 ? '-' : ''}${symbol}${formatAmount(Math.abs(num))}`;
 }
 
 export function parseAmount(input) {

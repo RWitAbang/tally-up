@@ -1,7 +1,8 @@
 import { supabase } from './supabase-client.js';
 import { requireSession } from './auth-guard.js';
-import { parseAmount, formatAmount, attachLiveAmountFormatting } from './currency.js';
+import { parseAmount, formatAmount, attachLiveAmountFormatting, currencySymbol } from './currency.js';
 import { accountTypeLabel } from './account-types.js';
+import { formatDateFriendly } from './date-utils.js';
 import { showConfirmDialog } from './confirm-dialog.js';
 
 const session = await requireSession();
@@ -15,8 +16,10 @@ if (session) {
   const form = document.getElementById('transaction-form');
   const accountSelect = document.getElementById('account');
   const dateInput = document.getElementById('date');
+  const dateFriendlyEl = document.getElementById('date-friendly');
   const descriptionInput = document.getElementById('description');
   const amountInput = document.getElementById('amount');
+  const amountSymbolEl = document.getElementById('amount-symbol');
   const amountErrorEl = document.getElementById('amount-error');
   const errorEl = document.getElementById('error');
   const saveButton = document.getElementById('save-button');
@@ -27,13 +30,27 @@ if (session) {
 
   const { data: accounts, error: accountsError } = await supabase
     .from('accounts')
-    .select('id, bank_name, account_type')
+    .select('id, bank_name, account_type, account_number, currency')
     .order('bank_name', { ascending: true });
 
   let existingTransaction = null;
   let loadError = accountsError;
+  let accountCurrencyById = new Map();
+
+  function updateAmountSymbol() {
+    const currency = accountCurrencyById.get(accountSelect.value);
+    amountSymbolEl.textContent = currency ? currencySymbol(currency) : '';
+  }
+
+  function updateFriendlyDate() {
+    dateFriendlyEl.textContent = dateInput.value ? formatDateFriendly(dateInput.value) : '';
+  }
+
+  dateInput.addEventListener('change', updateFriendlyDate);
 
   if (!loadError) {
+    accountCurrencyById = new Map(accounts.map((account) => [account.id, account.currency]));
+
     const placeholderOption = document.createElement('option');
     placeholderOption.value = '';
     placeholderOption.textContent = 'Select an account';
@@ -43,9 +60,13 @@ if (session) {
     for (const account of accounts) {
       const option = document.createElement('option');
       option.value = account.id;
-      option.textContent = `${account.bank_name} — ${accountTypeLabel(account.account_type)}`;
+      option.textContent = account.account_number
+        ? `${account.bank_name} — ${accountTypeLabel(account.account_type)} — ${account.account_number}`
+        : `${account.bank_name} — ${accountTypeLabel(account.account_type)}`;
       accountSelect.appendChild(option);
     }
+
+    accountSelect.addEventListener('change', updateAmountSymbol);
 
     if (transactionId) {
       const { data: tx, error: txError } = await supabase
@@ -67,10 +88,14 @@ if (session) {
         dateInput.value = tx.date;
         descriptionInput.value = tx.description ?? '';
         amountInput.value = formatAmount(tx.amount);
+        updateAmountSymbol();
+        updateFriendlyDate();
       }
     } else {
       dateInput.value = new Date().toISOString().slice(0, 10);
       accountSelect.value = preselectedAccount || '';
+      updateAmountSymbol();
+      updateFriendlyDate();
     }
   }
 

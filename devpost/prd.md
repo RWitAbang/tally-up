@@ -40,11 +40,12 @@ Minimal and clean, but colorful and playful — not sterile, not a bare spreadsh
 - Kept as its own piece of data, separate from bank accounts, so a future version could let more than one person set up their own profile without changing how bank accounts or transactions work.
 
 ### Account Setup
-- Fields per account: Bank Name, Account Number (optional), Account Type (savings, current, domiciliary, utility card, or domiciliary card), Currency (Naira or Dollar), Personal or Business, Starting Balance (optional, defaults to 0).
+- Fields per account: Bank Name, Account Number (optional), Account Type (savings, current, domiciliary, utility card, or domiciliary card), Currency (Naira, Dollar, or Pound), Personal or Business, Starting Balance (optional, defaults to 0).
 - One account at a time, looping with "add another account?" until declined — so someone with 2 accounts isn't stuck filling out a form sized for 9.
 - Available on first open (forced, until at least one account exists) and afterward on demand via "Add Account" on the Dashboard.
 - **Account details can be edited after creation** — Bank Name, Account Number, Account Type, Currency, Personal/Business, and Starting Balance are all editable later, not just at setup.
 - Account Number was added during `5-build` final review: with same-bank, same-type accounts in play (e.g. two savings accounts at the same bank), bank name and type alone weren't always enough to tell accounts apart at a glance.
+- Pound was added as a third currency during `5-build` final review, for completeness alongside Naira and Dollar. Elsewhere in this document, "Naira and Dollar" describes the originally-approved two-currency scope and is left as written rather than rewritten throughout — Dashboard totals, section subtotals, and Account Setup all support all three currencies in the built app.
 
 ### Dashboard
 - Overall totals: Total Naira and Total Dollar, summed across every account regardless of personal/business.

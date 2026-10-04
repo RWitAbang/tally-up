@@ -6,13 +6,13 @@
   <title>Account Settings — Tally Up</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/fill/style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/bold/style.css" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
   <div class="card">
     <div class="page-header">
-      <button id="back" class="icon-button" aria-label="Back to Dashboard"><i class="ph-fill ph-arrow-left"></i></button>
+      <button id="back" class="icon-button" aria-label="Back to Dashboard"><i class="ph-bold ph-house-line"></i></button>
       <h1>Account Settings</h1>
     </div>
     <div id="status"><div class="spinner"></div></div>
@@ -32,6 +32,7 @@
       <p class="error" id="password-error"></p>
 
       <button type="submit" id="save-button">Save Changes</button>
+      <button type="button" id="cancel" class="secondary">Cancel</button>
       <p class="error" id="error"></p>
       <p class="success" id="success"></p>
     </form>

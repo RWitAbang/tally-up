@@ -106,7 +106,7 @@ For this PoC, with exactly one user, this single row is inserted directly (via t
 | bank_name | text | editable after creation |
 | account_number | text, nullable | optional, editable — added during `5-build` final review to disambiguate accounts that share a bank name and type |
 | account_type | text | `savings` \| `current` \| `domiciliary` \| `utility_card` \| `domiciliary_card` — editable. The last two added during `5-build` final review. |
-| currency | text | `NGN` \| `USD` — editable |
+| currency | text | `NGN` \| `USD` \| `GBP` — editable. `GBP` added during `5-build` final review. |
 | category | text | `personal` \| `business` — editable |
 | starting_balance | numeric | default `0`, editable |
 | created_at | timestamptz | default `now()` |

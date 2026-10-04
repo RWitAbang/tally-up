@@ -34,6 +34,7 @@ You open the app and see a dashboard: total balance in Naira at the top, total i
 - Import historical data from your existing Excel workbook
 - Investments: treasury bills, fixed deposits, stocks
 - Backup/alternate access beyond phone (may fall out naturally if this is a web app)
+- Automated monthly export emailed as a backup, on the last day of each month — raised during `5-build` final review, deferred because it needs real backend infrastructure this static-site-plus-Supabase architecture doesn't have today (a scheduled server-side function, e.g. Supabase Edge Function + `pg_cron`, plus a separate email-sending service like Resend, since Supabase's built-in email only covers auth messages, not arbitrary attachments)
 - A consolidated navigation menu — Sign Out, Export to Excel, and Edit Account currently live as separate direct controls rather than one menu; raised during `5-build` final review, deferred rather than built then
 
 ## Explicitly Cut

@@ -8,7 +8,20 @@ export function showConfirmDialog(message, confirmLabel = 'Delete') {
 
     const messageEl = document.createElement('p');
     messageEl.className = 'confirm-message';
-    messageEl.textContent = message;
+    if (typeof message === 'string') {
+      messageEl.textContent = message;
+    } else {
+      for (const part of message) {
+        if (part.highlight) {
+          const strong = document.createElement('strong');
+          strong.className = 'confirm-highlight';
+          strong.textContent = part.text;
+          messageEl.appendChild(strong);
+        } else {
+          messageEl.appendChild(document.createTextNode(part.text));
+        }
+      }
+    }
     box.appendChild(messageEl);
 
     const actions = document.createElement('div');

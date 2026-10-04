@@ -33,6 +33,10 @@ if (session) {
     window.location.href = 'dashboard.html';
   });
 
+  document.getElementById('cancel').addEventListener('click', () => {
+    window.location.href = 'dashboard.html';
+  });
+
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     errorEl.textContent = '';

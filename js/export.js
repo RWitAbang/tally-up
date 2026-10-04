@@ -1,4 +1,5 @@
 import { supabase } from './supabase-client.js';
+import { accountTypeLabel } from './account-types.js';
 
 function sanitizeSheetName(name, usedNames) {
   const base = (name || 'Account').replace(/[\\/?*[\]]/g, '').slice(0, 31) || 'Account';
@@ -13,8 +14,21 @@ function sanitizeSheetName(name, usedNames) {
   return finalName;
 }
 
-function capitalize(text) {
-  return text.charAt(0).toUpperCase() + text.slice(1);
+function todayDateString() {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+// tx.date arrives as "YYYY-MM-DD" text from Supabase. Parsing it with
+// `new Date("YYYY-MM-DD")` reads it as UTC midnight, which can roll back
+// to the previous calendar day once converted to a local-time value —
+// building the Date from its parts in local time avoids that entirely.
+function parseDateCell(dateString) {
+  const [year, month, day] = dateString.split('-').map(Number);
+  return new Date(year, month - 1, day);
 }
 
 export async function exportToExcel() {
@@ -50,7 +64,7 @@ export async function exportToExcel() {
     let runningBalance = Number(account.starting_balance);
     const rows = accountTransactions.map((tx) => {
       runningBalance += tx.type === 'inflow' ? Number(tx.amount) : -Number(tx.amount);
-      return [tx.date, tx.type, tx.description || '', Number(tx.amount), runningBalance];
+      return [parseDateCell(tx.date), tx.type, tx.description || '', Number(tx.amount), runningBalance];
     });
 
     const sheetData = [
@@ -62,10 +76,20 @@ export async function exportToExcel() {
     ];
 
     const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
-    const sheetName = sanitizeSheetName(`${account.bank_name} ${capitalize(account.account_type)}`, usedNames);
+
+    const dateHeaderRow = 3;
+    rows.forEach((_, i) => {
+      const cellRef = XLSX.utils.encode_cell({ r: dateHeaderRow + 1 + i, c: 0 });
+      if (worksheet[cellRef]) {
+        worksheet[cellRef].z = 'dddd, d mmmm yyyy';
+      }
+    });
+    worksheet['!cols'] = [{ wch: 26 }, { wch: 10 }, { wch: 24 }, { wch: 14 }, { wch: 14 }];
+
+    const sheetName = sanitizeSheetName(`${account.bank_name} ${accountTypeLabel(account.account_type)}`, usedNames);
     XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
   }
 
-  XLSX.writeFile(workbook, 'tally-up-export.xlsx');
+  XLSX.writeFile(workbook, `${todayDateString()}_TallyUp_Export.xlsx`);
   return { ok: true };
 }

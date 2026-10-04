@@ -1,8 +1,12 @@
 import { supabase } from './supabase-client.js';
 import { requireSession } from './auth-guard.js';
-import { formatAmount } from './currency.js';
+import { formatSignedAmount, CURRENCIES, currencyLabel, currencySymbol } from './currency.js';
 import { exportToExcel } from './export.js';
 import { accountTypeLabel } from './account-types.js';
+import { fitText } from './fit-text.js';
+import { createPaginatedList } from './pagination.js';
+
+const ACCOUNTS_PAGE_SIZE = 6;
 
 const session = await requireSession();
 
@@ -53,8 +57,8 @@ if (session) {
   });
 }
 
-function currencySymbol(code) {
-  return code === 'NGN' ? '₦' : '$';
+function emptyTotals() {
+  return Object.fromEntries(CURRENCIES.map((code) => [code, 0]));
 }
 
 function computeBalances(accounts, transactions) {
@@ -80,7 +84,7 @@ function renderAccountRow(account, balance) {
       <span class="account-row-type">${accountTypeLabel(account.account_type)} · ${account.currency}</span>
       ${account.account_number ? `<span class="account-row-number">${account.account_number}</span>` : ''}
     </div>
-    <div class="account-row-balance">${currencySymbol(account.currency)}${formatAmount(balance)}</div>
+    <div class="account-row-balance ${balance < 0 ? 'negative' : 'positive'}">${formatSignedAmount(currencySymbol(account.currency), balance)}</div>
   `;
   return row;
 }
@@ -95,19 +99,32 @@ function renderSection(title, totals, accounts, balanceByAccount) {
 
   const subtotals = document.createElement('div');
   subtotals.className = 'section-subtotals';
-  subtotals.innerHTML = `<span>₦${formatAmount(totals.NGN)}</span><span>$${formatAmount(totals.USD)}</span>`;
+  subtotals.innerHTML = CURRENCIES.map(
+    (code) =>
+      `<span class="${totals[code] < 0 ? 'negative' : 'positive'}">${formatSignedAmount(currencySymbol(code), totals[code])}</span>`
+  ).join('');
   section.appendChild(subtotals);
 
-  if (accounts.length === 0) {
-    const empty = document.createElement('p');
-    empty.className = 'empty-state';
-    empty.textContent = `no ${title.toLowerCase()} accounts yet`;
-    section.appendChild(empty);
-  } else {
-    for (const account of accounts) {
-      section.appendChild(renderAccountRow(account, balanceByAccount.get(account.id) ?? 0));
-    }
-  }
+  const listEl = document.createElement('div');
+  section.appendChild(listEl);
+
+  const paginationEl = document.createElement('div');
+  paginationEl.className = 'pagination';
+  section.appendChild(paginationEl);
+
+  createPaginatedList({
+    listEl,
+    paginationEl,
+    items: accounts,
+    pageSize: ACCOUNTS_PAGE_SIZE,
+    renderItem: (account) => renderAccountRow(account, balanceByAccount.get(account.id) ?? 0),
+    onEmpty: (el) => {
+      const empty = document.createElement('p');
+      empty.className = 'empty-state';
+      empty.textContent = `no ${title.toLowerCase()} accounts yet`;
+      el.appendChild(empty);
+    },
+  });
 
   return section;
 }
@@ -115,9 +132,9 @@ function renderSection(title, totals, accounts, balanceByAccount) {
 function renderDashboard(accounts, transactions, totalsEl, sectionsEl) {
   const balanceByAccount = computeBalances(accounts, transactions);
 
-  const overallTotals = { NGN: 0, USD: 0 };
-  const personalTotals = { NGN: 0, USD: 0 };
-  const businessTotals = { NGN: 0, USD: 0 };
+  const overallTotals = emptyTotals();
+  const personalTotals = emptyTotals();
+  const businessTotals = emptyTotals();
   const personalAccounts = [];
   const businessAccounts = [];
 
@@ -133,12 +150,30 @@ function renderDashboard(accounts, transactions, totalsEl, sectionsEl) {
     }
   }
 
+  const secondaryCurrencies = CURRENCIES.filter((code) => code !== 'NGN');
+
   totalsEl.innerHTML = `
     <div class="overall-totals">
-      <div class="overall-total"><span>Total Naira</span><strong>₦${formatAmount(overallTotals.NGN)}</strong></div>
-      <div class="overall-total"><span>Total Dollar</span><strong>$${formatAmount(overallTotals.USD)}</strong></div>
+      <div class="overall-total overall-total-primary ${overallTotals.NGN < 0 ? 'negative-balance' : ''}">
+        <span>Total ${currencyLabel('NGN')} (${currencySymbol('NGN')})</span>
+        <strong>${formatSignedAmount(currencySymbol('NGN'), overallTotals.NGN)}</strong>
+      </div>
+      <div class="overall-totals-secondary">
+        ${secondaryCurrencies
+          .map(
+            (code) => `
+          <div class="overall-total ${overallTotals[code] < 0 ? 'negative-balance' : ''}">
+            <span>Total ${currencyLabel(code)} (${currencySymbol(code)})</span>
+            <strong>${formatSignedAmount(currencySymbol(code), overallTotals[code])}</strong>
+          </div>
+        `
+          )
+          .join('')}
+      </div>
     </div>
   `;
+
+  totalsEl.querySelectorAll('.overall-total strong').forEach((el) => fitText(el));
 
   sectionsEl.innerHTML = '';
   sectionsEl.appendChild(renderSection('Personal', personalTotals, personalAccounts, balanceByAccount));

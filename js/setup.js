@@ -1,6 +1,6 @@
 import { supabase } from './supabase-client.js';
 import { requireSession } from './auth-guard.js';
-import { formatAmount, parseAmount, attachLiveAmountFormatting } from './currency.js';
+import { formatAmount, parseAmount, attachLiveAmountFormatting, currencySymbol } from './currency.js';
 import { showConfirmDialog } from './confirm-dialog.js';
 
 const session = await requireSession();
@@ -17,16 +17,29 @@ if (session) {
   const balanceInput = document.getElementById('starting_balance');
   const balanceErrorEl = document.getElementById('balance-error');
   const pageTitle = document.getElementById('page-title');
+  const welcomeDescEl = document.getElementById('welcome-desc');
   const saveButton = document.getElementById('save-button');
   const cancelButton = document.getElementById('cancel');
   const deleteButton = document.getElementById('delete-account');
   const accountNumberInput = document.getElementById('account_number');
+  const addTransactionNowButton = document.getElementById('add-transaction-now');
+  const balanceLockedHint = document.getElementById('balance-locked-hint');
+  const currencySelect = document.getElementById('currency');
+  const balanceSymbolEl = document.getElementById('balance-symbol');
+
+  let newAccountId = null;
+  let balanceLocked = false;
 
   attachLiveAmountFormatting(balanceInput);
 
   accountNumberInput.addEventListener('input', () => {
     accountNumberInput.value = accountNumberInput.value.replace(/[^0-9]/g, '');
   });
+
+  currencySelect.addEventListener('change', () => {
+    balanceSymbolEl.textContent = currencySymbol(currencySelect.value);
+  });
+  balanceSymbolEl.textContent = currencySymbol(currencySelect.value);
 
   let existingAccount = null;
   let loadError = null;
@@ -52,8 +65,20 @@ if (session) {
       form.account_number.value = account.account_number ?? '';
       form.account_type.value = account.account_type;
       form.currency.value = account.currency;
+      balanceSymbolEl.textContent = currencySymbol(account.currency);
       form.category.value = account.category;
       balanceInput.value = formatAmount(account.starting_balance);
+
+      const { count: transactionCount } = await supabase
+        .from('transactions')
+        .select('id', { count: 'exact', head: true })
+        .eq('account_id', editingAccountId);
+
+      if (transactionCount > 0) {
+        balanceLocked = true;
+        balanceInput.disabled = true;
+        balanceLockedHint.hidden = false;
+      }
 
       cancelButton.hidden = false;
       cancelButton.addEventListener('click', () => {
@@ -62,8 +87,13 @@ if (session) {
 
       deleteButton.hidden = false;
       deleteButton.addEventListener('click', async () => {
+        const accountLabel = account.account_number ? `${account.bank_name} (${account.account_number})` : account.bank_name;
         const confirmed = await showConfirmDialog(
-          `Delete ${account.bank_name}? This also deletes every transaction on this account. This can't be undone.`,
+          [
+            { text: 'Delete ' },
+            { text: accountLabel, highlight: true },
+            { text: "? This also deletes every transaction on this account. This can't be undone." },
+          ],
           'Delete Account'
         );
         if (!confirmed) return;
@@ -84,6 +114,9 @@ if (session) {
       cancelButton.addEventListener('click', () => {
         window.location.href = 'dashboard.html';
       });
+    } else {
+      pageTitle.textContent = 'Welcome to Tally Up';
+      welcomeDescEl.hidden = false;
     }
   }
 
@@ -169,17 +202,18 @@ if (session) {
       }
 
       if (existingAccount) {
-        const { error } = await supabase
-          .from('accounts')
-          .update({
-            bank_name: bankName,
-            account_number: accountNumber || null,
-            account_type: accountType,
-            currency,
-            category,
-            starting_balance: startingBalance,
-          })
-          .eq('id', existingAccount.id);
+        const updates = {
+          bank_name: bankName,
+          account_number: accountNumber || null,
+          account_type: accountType,
+          currency,
+          category,
+        };
+        if (!balanceLocked) {
+          updates.starting_balance = startingBalance;
+        }
+
+        const { error } = await supabase.from('accounts').update(updates).eq('id', existingAccount.id);
 
         if (error) {
           errorEl.textContent = "couldn't save — try again";
@@ -191,15 +225,19 @@ if (session) {
         return;
       }
 
-      const { error } = await supabase.from('accounts').insert({
-        user_id: session.user.id,
-        bank_name: bankName,
-        account_number: accountNumber || null,
-        account_type: accountType,
-        currency,
-        category,
-        starting_balance: startingBalance,
-      });
+      const { data: inserted, error } = await supabase
+        .from('accounts')
+        .insert({
+          user_id: session.user.id,
+          bank_name: bankName,
+          account_number: accountNumber || null,
+          account_type: accountType,
+          currency,
+          category,
+          starting_balance: startingBalance,
+        })
+        .select()
+        .single();
 
       if (error) {
         errorEl.textContent = "couldn't save — try again";
@@ -207,6 +245,7 @@ if (session) {
         return;
       }
 
+      newAccountId = inserted.id;
       form.reset();
       reenableSave();
       formSection.hidden = true;
@@ -214,8 +253,14 @@ if (session) {
     });
 
     document.getElementById('add-another').addEventListener('click', () => {
+      pageTitle.textContent = 'Add an Account';
+      welcomeDescEl.hidden = true;
       confirmSection.hidden = true;
       formSection.hidden = false;
+    });
+
+    addTransactionNowButton.addEventListener('click', () => {
+      window.location.href = `transaction.html?account=${newAccountId}`;
     });
 
     document.getElementById('done').addEventListener('click', () => {

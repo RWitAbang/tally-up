@@ -11,6 +11,7 @@
 <body>
   <div class="card">
     <h1 id="page-title">Add an Account</h1>
+    <p id="welcome-desc" class="welcome-desc" hidden>Helping you track all your accounts, transactions, and balances in one place — let's start with your first one!</p>
     <div id="status"></div>
     <div id="form-section">
       <form id="setup-form">
@@ -33,6 +34,7 @@
         <select id="currency" name="currency">
           <option value="NGN">Naira (₦)</option>
           <option value="USD">Dollar ($)</option>
+          <option value="GBP">Pound (£)</option>
         </select>
 
         <label for="category">Personal or Business</label>
@@ -42,7 +44,11 @@
         </select>
 
         <label for="starting_balance">Starting Balance</label>
-        <input type="text" inputmode="decimal" id="starting_balance" name="starting_balance" placeholder="0.00" />
+        <div class="amount-field">
+          <span class="amount-symbol" id="balance-symbol">₦</span>
+          <input type="text" inputmode="decimal" id="starting_balance" name="starting_balance" placeholder="0.00" />
+        </div>
+        <p class="hint" id="balance-locked-hint" hidden>Locked because this account already has transactions — changing it now would throw off every balance calculated since.</p>
         <p class="error" id="balance-error"></p>
 
         <button type="submit" id="save-button">Save Account</button>
@@ -53,8 +59,9 @@
     </div>
     <div id="confirm-section" hidden>
       <p>Account added!</p>
-      <button id="add-another">Add another account</button>
-      <button id="done">Done — go to Dashboard</button>
+      <button id="done">Done! — go to Dashboard</button>
+      <button id="add-transaction-now" class="secondary">Add a transaction to this account</button>
+      <button id="add-another" class="secondary">Add another account</button>
     </div>
   </div>
   <script type="module" src="js/setup.js"></script>
