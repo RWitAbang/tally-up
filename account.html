@@ -23,7 +23,28 @@
     <div id="account-content" hidden>
       <div id="balance-section"></div>
       <button id="add-transaction">Add Transaction</button>
-      <h2>History</h2>
+      <div class="history-heading">
+        <h2>History</h2>
+        <button id="select-toggle" class="sign-out-link">Select</button>
+      </div>
+      <div id="selection-bar" class="selection-bar" hidden>
+        <span id="selection-count"></span>
+        <button id="delete-selected" class="sign-out-link">Delete</button>
+        <button id="cancel-selection" class="sign-out-link">Cancel</button>
+      </div>
+      <div id="undo-banner" class="undo-banner" hidden>
+        <span id="undo-text"></span>
+        <button id="undo-button" class="sign-out-link">Undo</button>
+      </div>
+      <p class="hint">Type to search by description or amount. Use the menu to show only inflows or only expenses.</p>
+      <div class="history-filters">
+        <input type="search" id="history-search" aria-label="Search transactions" placeholder="Search description or amount" />
+        <select id="history-type" aria-label="Show transactions">
+          <option value="all">All transactions</option>
+          <option value="inflow">Inflows only</option>
+          <option value="expense">Expenses only</option>
+        </select>
+      </div>
       <div id="starting-balance-row"></div>
       <div id="history-list"></div>
       <div id="pagination" class="pagination"></div>

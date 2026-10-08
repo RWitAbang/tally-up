@@ -2,6 +2,8 @@ import { supabase } from './supabase-client.js';
 import { requireSession } from './auth-guard.js';
 import { formatAmount, parseAmount, attachLiveAmountFormatting, currencySymbol } from './currency.js';
 import { showConfirmDialog } from './confirm-dialog.js';
+import { downloadImportTemplate, parseImportFile } from './import-transactions.js';
+import { formatDateFriendly } from './date-utils.js';
 
 const session = await requireSession();
 
@@ -25,10 +27,131 @@ if (session) {
   const addTransactionNowButton = document.getElementById('add-transaction-now');
   const balanceLockedHint = document.getElementById('balance-locked-hint');
   const currencySelect = document.getElementById('currency');
+  const accountTypeSelect = document.getElementById('account_type');
+  const ngnOption = currencySelect.querySelector('option[value="NGN"]');
   const balanceSymbolEl = document.getElementById('balance-symbol');
+  const importSection = document.getElementById('import-section');
+  const downloadTemplateButton = document.getElementById('download-template');
+  const uploadTemplateButton = document.getElementById('upload-template');
+  const importFileInput = document.getElementById('import-file');
+  const importFilenameEl = document.getElementById('import-filename');
+  const importErrorEl = document.getElementById('import-error');
+  const importPreviewEl = document.getElementById('import-preview');
+  const importSummaryEl = document.getElementById('import-summary');
+  const importSkippedEl = document.getElementById('import-skipped');
+  const confirmMessageEl = document.getElementById('confirm-message');
+  const importQuestionEl = document.getElementById('import-question');
+  const importChoiceYesButton = document.getElementById('import-choice-yes');
+  const importChoiceNoButton = document.getElementById('import-choice-no');
+  const accountFieldsEl = document.getElementById('account-fields');
+  const manualBalanceFieldEl = document.getElementById('manual-balance-field');
+  const importBalanceReadoutEl = document.getElementById('import-balance-readout');
+  const importHeaderEl = document.getElementById('import-header');
 
   let newAccountId = null;
   let balanceLocked = false;
+  let pendingImport = null;
+
+  function resetImportState() {
+    pendingImport = null;
+    importFileInput.value = '';
+    importFilenameEl.hidden = true;
+    importErrorEl.textContent = '';
+    importPreviewEl.hidden = true;
+    importHeaderEl.hidden = false;
+  }
+
+  function updateImportBalanceReadout() {
+    importBalanceReadoutEl.textContent =
+      `Starting Balance: ${currencySymbol(currencySelect.value)}${formatAmount(pendingImport.startingBalance)} (from your imported file)`;
+  }
+
+  function showImportChoice() {
+    accountFieldsEl.hidden = true;
+    importSection.hidden = false;
+    resetImportState();
+    balanceInput.value = '';
+  }
+
+  function showManualEntry() {
+    importQuestionEl.hidden = true;
+    importSection.hidden = true;
+    resetImportState();
+    balanceInput.value = '';
+    accountFieldsEl.hidden = false;
+    manualBalanceFieldEl.hidden = false;
+    importBalanceReadoutEl.hidden = true;
+  }
+
+  importChoiceYesButton.addEventListener('click', showImportChoice);
+  importChoiceNoButton.addEventListener('click', showManualEntry);
+
+  downloadTemplateButton.addEventListener('click', () => downloadImportTemplate());
+  uploadTemplateButton.addEventListener('click', () => importFileInput.click());
+
+  importFileInput.addEventListener('change', async () => {
+    importErrorEl.textContent = '';
+    importPreviewEl.hidden = true;
+    pendingImport = null;
+
+    const file = importFileInput.files[0];
+    if (!file) {
+      importFilenameEl.hidden = true;
+      return;
+    }
+
+    importFilenameEl.textContent = `Selected: ${file.name}`;
+    importFilenameEl.hidden = false;
+
+    try {
+      const result = await parseImportFile(file);
+      if (result.transactions.length === 0) {
+        importErrorEl.textContent = 'no valid transactions found in this file';
+        importFileInput.value = '';
+        importFilenameEl.hidden = true;
+        return;
+      }
+
+      pendingImport = result;
+      balanceInput.value = formatAmount(result.startingBalance);
+      importQuestionEl.hidden = true;
+      importHeaderEl.hidden = true;
+      importFilenameEl.textContent = `Uploaded: ${file.name}`;
+      accountFieldsEl.hidden = false;
+      manualBalanceFieldEl.hidden = true;
+      importBalanceReadoutEl.hidden = false;
+      updateImportBalanceReadout();
+
+      const dates = result.transactions.map((t) => t.date).sort();
+      const count = result.transactions.length;
+      importSummaryEl.textContent =
+        `Found ${count} transaction${count === 1 ? '' : 's'}, from ${formatDateFriendly(dates[0])} to ` +
+        `${formatDateFriendly(dates[dates.length - 1])}. Starting balance set to ${formatAmount(result.startingBalance)}.`;
+
+      importSkippedEl.innerHTML = '';
+      if (result.skipped.length > 0) {
+        const header = document.createElement('li');
+        header.textContent = `${result.skipped.length} row${result.skipped.length === 1 ? '' : 's'} skipped:`;
+        importSkippedEl.appendChild(header);
+        for (const skip of result.skipped.slice(0, 10)) {
+          const li = document.createElement('li');
+          li.textContent = `Row ${skip.row}: ${skip.reason}`;
+          importSkippedEl.appendChild(li);
+        }
+        if (result.skipped.length > 10) {
+          const li = document.createElement('li');
+          li.textContent = `…and ${result.skipped.length - 10} more`;
+          importSkippedEl.appendChild(li);
+        }
+      }
+
+      importPreviewEl.hidden = false;
+    } catch (err) {
+      importErrorEl.textContent = err.message;
+      importFileInput.value = '';
+      importFilenameEl.hidden = true;
+    }
+  });
 
   attachLiveAmountFormatting(balanceInput);
 
@@ -38,8 +161,29 @@ if (session) {
 
   currencySelect.addEventListener('change', () => {
     balanceSymbolEl.textContent = currencySymbol(currencySelect.value);
+    if (pendingImport) updateImportBalanceReadout();
   });
   balanceSymbolEl.textContent = currencySymbol(currencySelect.value);
+
+  function isDomiciliaryType(type) {
+    return type === 'domiciliary' || type === 'domiciliary_card';
+  }
+
+  // A domiciliary account is a foreign-currency account by definition, so
+  // Naira is never a valid choice for one. Disabling rather than removing
+  // the option means a pre-existing account saved with this combination
+  // (from before this rule existed) still displays correctly when edited.
+  ngnOption.disabled = isDomiciliaryType(accountTypeSelect.value);
+
+  accountTypeSelect.addEventListener('change', () => {
+    const restrictNgn = isDomiciliaryType(accountTypeSelect.value);
+    ngnOption.disabled = restrictNgn;
+    if (restrictNgn && currencySelect.value === 'NGN') {
+      currencySelect.value = 'USD';
+      balanceSymbolEl.textContent = currencySymbol(currencySelect.value);
+      if (pendingImport) updateImportBalanceReadout();
+    }
+  });
 
   let existingAccount = null;
   let loadError = null;
@@ -47,6 +191,9 @@ if (session) {
   if (editingAccountId) {
     statusEl.innerHTML = '<div class="spinner"></div>';
     formSection.hidden = true;
+    importQuestionEl.hidden = true;
+    importSection.hidden = true;
+    accountFieldsEl.hidden = false;
 
     const { data: account, error: accountLoadError } = await supabase
       .from('accounts')
@@ -64,6 +211,7 @@ if (session) {
       form.bank_name.value = account.bank_name;
       form.account_number.value = account.account_number ?? '';
       form.account_type.value = account.account_type;
+      ngnOption.disabled = isDomiciliaryType(account.account_type);
       form.currency.value = account.currency;
       balanceSymbolEl.textContent = currencySymbol(account.currency);
       form.category.value = account.category;
@@ -246,7 +394,26 @@ if (session) {
       }
 
       newAccountId = inserted.id;
+
+      if (pendingImport) {
+        const rows = pendingImport.transactions.map((t) => ({
+          user_id: session.user.id,
+          account_id: inserted.id,
+          date: t.date,
+          type: t.type,
+          description: t.description || null,
+          amount: t.amount,
+        }));
+        const { error: importError } = await supabase.from('transactions').insert(rows);
+        confirmMessageEl.textContent = importError
+          ? 'Account added, but the import failed — try adding those transactions from the account page.'
+          : `Account added! Imported ${rows.length} transaction${rows.length === 1 ? '' : 's'}.`;
+      } else {
+        confirmMessageEl.textContent = 'Account added!';
+      }
+
       form.reset();
+      resetImportState();
       reenableSave();
       formSection.hidden = true;
       confirmSection.hidden = false;
@@ -257,6 +424,11 @@ if (session) {
       welcomeDescEl.hidden = true;
       confirmSection.hidden = true;
       formSection.hidden = false;
+      importQuestionEl.hidden = false;
+      accountFieldsEl.hidden = true;
+      importSection.hidden = true;
+      resetImportState();
+      balanceInput.value = '';
     });
 
     addTransactionNowButton.addEventListener('click', () => {

@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
   <div class="card">
@@ -15,50 +16,81 @@
     <div id="status"></div>
     <div id="form-section">
       <form id="setup-form">
-        <label for="bank_name">Bank Name</label>
-        <input type="text" id="bank_name" name="bank_name" required />
-
-        <label for="account_number">Account Number (optional)</label>
-        <input type="text" inputmode="numeric" id="account_number" name="account_number" placeholder="e.g. 0123456789" />
-
-        <label for="account_type">Account Type</label>
-        <select id="account_type" name="account_type">
-          <option value="savings">Savings</option>
-          <option value="current">Current</option>
-          <option value="domiciliary">Domiciliary</option>
-          <option value="utility_card">Utility Card</option>
-          <option value="domiciliary_card">Domiciliary Card</option>
-        </select>
-
-        <label for="currency">Currency</label>
-        <select id="currency" name="currency">
-          <option value="NGN">Naira (₦)</option>
-          <option value="USD">Dollar ($)</option>
-          <option value="GBP">Pound (£)</option>
-        </select>
-
-        <label for="category">Personal or Business</label>
-        <select id="category" name="category">
-          <option value="personal">Personal</option>
-          <option value="business">Business</option>
-        </select>
-
-        <label for="starting_balance">Starting Balance</label>
-        <div class="amount-field">
-          <span class="amount-symbol" id="balance-symbol">₦</span>
-          <input type="text" inputmode="decimal" id="starting_balance" name="starting_balance" placeholder="0.00" />
+        <div id="import-question">
+          <label>Do you have existing transactions to import from a spreadsheet?</label>
+          <div class="import-actions">
+            <button type="button" id="import-choice-yes" class="secondary">Yes, import history</button>
+            <button type="button" id="import-choice-no" class="secondary">No, enter manually</button>
+          </div>
         </div>
-        <p class="hint" id="balance-locked-hint" hidden>Locked because this account already has transactions — changing it now would throw off every balance calculated since.</p>
-        <p class="error" id="balance-error"></p>
 
-        <button type="submit" id="save-button">Save Account</button>
-        <button type="button" id="delete-account" class="secondary" hidden>Delete Account</button>
-        <button type="button" id="cancel" class="secondary" hidden>Cancel</button>
-        <p class="error" id="error"></p>
+        <div id="import-section" hidden>
+          <div id="import-header">
+            <label>Import History</label>
+            <p class="hint">Download the template, fill it in, then upload it here.</p>
+            <div class="import-actions">
+              <button type="button" id="download-template" class="secondary">Download Template</button>
+              <button type="button" id="upload-template" class="secondary">Upload Filled Template</button>
+            </div>
+          </div>
+          <input type="file" id="import-file" accept=".xlsx" hidden />
+          <p class="hint" id="import-filename" hidden></p>
+          <p class="error" id="import-error"></p>
+          <div id="import-preview" class="import-preview" hidden>
+            <p id="import-summary"></p>
+            <ul id="import-skipped"></ul>
+          </div>
+        </div>
+
+        <div id="account-fields" hidden>
+          <label for="bank_name">Bank Name</label>
+          <input type="text" id="bank_name" name="bank_name" required />
+
+          <label for="account_number">Account Number (optional)</label>
+          <input type="text" inputmode="numeric" id="account_number" name="account_number" placeholder="e.g. 0123456789" />
+
+          <label for="account_type">Account Type</label>
+          <select id="account_type" name="account_type">
+            <option value="savings">Savings</option>
+            <option value="current">Current</option>
+            <option value="domiciliary">Domiciliary</option>
+            <option value="utility_card">Utility Card</option>
+            <option value="domiciliary_card">Domiciliary Card</option>
+          </select>
+
+          <label for="currency">Currency</label>
+          <select id="currency" name="currency">
+            <option value="NGN">Naira (₦)</option>
+            <option value="USD">Dollar ($)</option>
+            <option value="GBP">Pound (£)</option>
+          </select>
+
+          <label for="category">Personal or Business</label>
+          <select id="category" name="category">
+            <option value="personal">Personal</option>
+            <option value="business">Business</option>
+          </select>
+
+          <div id="manual-balance-field">
+            <label for="starting_balance">Starting Balance</label>
+            <div class="amount-field">
+              <span class="amount-symbol" id="balance-symbol">₦</span>
+              <input type="text" inputmode="decimal" id="starting_balance" name="starting_balance" placeholder="0.00" />
+            </div>
+            <p class="hint" id="balance-locked-hint" hidden>Locked because this account already has transactions — changing it now would throw off every balance calculated since.</p>
+            <p class="error" id="balance-error"></p>
+          </div>
+          <p class="hint" id="import-balance-readout" hidden></p>
+
+          <button type="submit" id="save-button">Save Account</button>
+          <button type="button" id="delete-account" class="secondary" hidden>Delete Account</button>
+          <button type="button" id="cancel" class="secondary" hidden>Cancel</button>
+          <p class="error" id="error"></p>
+        </div>
       </form>
     </div>
     <div id="confirm-section" hidden>
-      <p>Account added!</p>
+      <p id="confirm-message">Account added!</p>
       <button id="done">Done! — go to Dashboard</button>
       <button id="add-transaction-now" class="secondary">Add a transaction to this account</button>
       <button id="add-another" class="secondary">Add another account</button>

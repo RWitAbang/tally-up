@@ -203,7 +203,28 @@ input, select {
   border-radius: 10px;
   font-family: inherit;
   font-size: 1rem;
+  color: var(--slate);
   background: white;
+}
+
+select,
+option {
+  color: var(--sky-dark);
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: var(--sky-dark);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px white inset;
+  -webkit-text-fill-color: var(--slate);
+  caret-color: var(--slate);
+  transition: background-color 9999s ease-out;
 }
 
 .amount-field {
@@ -331,6 +352,153 @@ input, select {
 
 .transaction-row:hover {
   border-color: var(--sky);
+}
+
+.password-field {
+  position: relative;
+  margin-top: 6px;
+}
+
+.password-field input {
+  margin-top: 0;
+  padding-right: 64px;
+}
+
+button.password-toggle {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: auto;
+  margin-top: 0;
+  padding: 6px 8px;
+  min-height: 0;
+  background: none;
+  color: var(--sky-dark);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+button.password-toggle:hover {
+  background: none;
+  color: var(--raspberry);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+#greeting {
+  margin-top: 8px;
+}
+
+.text-button {
+  background: none;
+  border: none;
+  color: var(--sky-dark);
+  text-decoration: underline;
+  font: inherit;
+  padding: 0;
+  margin: 0;
+  width: auto;
+  min-height: 0;
+  cursor: pointer;
+}
+
+.text-button:hover {
+  background: none;
+  color: var(--raspberry);
+}
+
+.import-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.import-actions button {
+  flex: 1;
+  margin-top: 0;
+}
+
+.import-preview {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 2px solid #e5ded5;
+  border-radius: 10px;
+  background: #fdfaf6;
+  font-size: 0.9rem;
+}
+
+.import-preview ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+
+.history-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.selection-bar,
+.undo-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #fdfaf6;
+  border: 2px solid #e5ded5;
+}
+
+.selection-bar button,
+.undo-banner button {
+  margin-top: 0;
+  width: auto;
+  min-height: 0;
+}
+
+.selection-bar button.sign-out-link,
+.undo-banner button.sign-out-link {
+  padding: 4px 6px;
+}
+
+#selection-bar button#delete-selected {
+  color: var(--raspberry);
+}
+
+.selection-bar button.sign-out-link:disabled {
+  background: none;
+  color: var(--raspberry);
+  opacity: 0.4;
+}
+
+.transaction-row.selected {
+  border-color: var(--raspberry);
+  background: rgba(184, 51, 106, 0.08);
+}
+
+#history-list.selecting .transaction-row {
+  cursor: pointer;
+}
+
+.history-filters {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.history-filters input {
+  flex: 1;
+  min-width: 0;
+}
+
+.history-filters select {
+  width: auto;
+  flex: 0 0 auto;
 }
 
 .transaction-row.starting-balance-row {
@@ -482,7 +650,12 @@ button.secondary {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 2px;
+  gap: 0;
+}
+
+.header-actions .sign-out-link {
+  min-height: 44px;
+  margin: -8px 0;
 }
 
 .hint {

@@ -11,6 +11,10 @@ const ACCOUNTS_PAGE_SIZE = 6;
 const session = await requireSession();
 
 if (session) {
+  const { data: profile } = await supabase.from('profiles').select('name').eq('id', session.user.id).single();
+  const firstName = profile?.name?.trim().split(/\s+/)[0];
+  document.getElementById('greeting').textContent = firstName ? `Hi, ${firstName}` : 'Dashboard';
+
   const statusEl = document.getElementById('status');
   const dashboardContentEl = document.getElementById('dashboard-content');
   const totalsEl = document.getElementById('totals');

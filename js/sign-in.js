@@ -1,7 +1,9 @@
 import { supabase } from './supabase-client.js';
+import { attachPasswordToggle } from './password-field.js';
 
 const form = document.getElementById('sign-in-form');
 const errorEl = document.getElementById('error');
+attachPasswordToggle(document.getElementById('password'));
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault();

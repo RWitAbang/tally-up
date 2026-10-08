@@ -1,9 +1,13 @@
 import { supabase } from './supabase-client.js';
 import { requireSession } from './auth-guard.js';
+import { attachPasswordToggle } from './password-field.js';
 
 const session = await requireSession();
 
 if (session) {
+  attachPasswordToggle(document.getElementById('new_password'));
+  attachPasswordToggle(document.getElementById('confirm_password'));
+
   const statusEl = document.getElementById('status');
   const form = document.getElementById('settings-form');
   const errorEl = document.getElementById('error');
@@ -59,6 +63,11 @@ if (session) {
       return;
     }
 
+    if (newPassword && newPassword !== form.confirm_password.value) {
+      passwordErrorEl.textContent = "the passwords don't match — check both fields";
+      return;
+    }
+
     const originalButtonText = saveButton.textContent;
     saveButton.disabled = true;
     saveButton.textContent = 'Saving…';
@@ -98,6 +107,7 @@ if (session) {
       }
       messages.push('Password updated.');
       form.new_password.value = '';
+      form.confirm_password.value = '';
     }
 
     successEl.textContent = messages.join(' ');
