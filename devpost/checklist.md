@@ -82,33 +82,33 @@ Build mode: learn
 ## Hands-on Checkpoints
 
 - [x] Early usable behavior explored — after Slice 2, once you can add your real accounts and see them listed
-- [ ] Final kick-the-tires exploration and feedback completed
+- [x] Final kick-the-tires exploration and feedback completed
 
 ## Final Review
 
 Kick-the-tires feedback from the learner, agreed fixes:
 
-- [ ] Replace plain "loading..." text with a visible loading spinner across pages
-- [ ] After adding a transaction, land back on that account's page instead of the Dashboard (matches edit/delete)
-- [ ] Show account type in the transaction form's account picker and at the top of the account page
-- [ ] Add an optional Account Number field to Account Setup; display it at the top of the account page
-- [ ] Export: name sheets using bank name + account type (e.g. "GT Current") instead of a generic "(2)" suffix
-- [ ] Export: add a running Balance column to each sheet, oldest-to-newest
+- [x] Replace plain "loading..." text with a visible loading spinner across pages — confirmed: `.spinner` rendered in `#status` on every page (`index.html`, `dashboard.html`, `account.html`, `transaction.html`, `account-settings.html`, and during setup in `js/setup.js`)
+- [x] After adding a transaction, land back on that account's page instead of the Dashboard (matches edit/delete) — confirmed: `js/transaction.js` redirects to `account.html?id=...` after save, edit, and delete
+- [x] Show account type in the transaction form's account picker and at the top of the account page — confirmed: `accountTypeLabel` used in both `js/transaction.js` (picker options) and `js/account.js` (page heading)
+- [x] Add an optional Account Number field to Account Setup; display it at the top of the account page — confirmed: `account_number` field in `setup.html`/`js/setup.js`, rendered via `numberLineEl` right under the bank name in `js/account.js`
+- [x] Export: name sheets using bank name + account type (e.g. "GT Current") instead of a generic "(2)" suffix — confirmed: `js/export.js` builds sheet names from `bank_name` + `accountTypeLabel`, falling back to a numeric suffix only on an actual name collision
+- [x] Export: add a running Balance column to each sheet, oldest-to-newest — confirmed: `js/export.js` sorts transactions ascending by date then `created_at`, and accumulates `runningBalance` per row
 - [ ] Noted for later, not building now: a consolidated menu (Sign Out / Export / Edit are currently separate direct controls)
 
-- [ ] Final review complete — feedback resolved and learner confirms ready to ship
+- [x] Final review complete — feedback resolved and learner confirms ready to ship
 
 ## Code Tour and App Map
 
-- [ ] Learning activity complete — guided route, focused alternative, prior practice connected, or brief recap
-- [ ] Optional edit and transfer reflection addressed — offered/declined/already covered/not applicable as appropriate
-- [ ] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
+- [x] Learning activity complete — guided route, focused alternative, prior practice connected, or brief recap
+- [x] Optional edit and transfer reflection addressed — offered/declined/already covered/not applicable as appropriate
+- [x] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
 
-Activity and evidence: [not yet started]
-Route and stops: [not yet started]
-Edit outcome: [not yet started]
-Reflection: [not yet started]
-Activity mode: [not yet started]
+Activity and evidence: Guided route (newcomer default). Traced "log a transaction, watch the balance update" live: `js/transaction.js`'s submit handler and `insert()` call, then `js/account.js`'s `renderBalance()` reduce, connected to the real `transactions_user_id_fkey` cascade bug hit earlier this session.
+Route and stops: 1) `js/transaction.js:108` form submit → `insert()` at `:150`. 2) `js/account.js:88` `renderBalance()`. 3) same function's write-back to the page. Learner correctly described the insert fields and the balance reduce unprompted at each stop.
+Edit outcome: Tried — changed `transaction.html`'s `#save-button` text from "Save Transaction" to "Log It", saved, confirmed it rendered, then reverted back to the original text. File ends unchanged; nothing to commit for this step.
+Reflection: Offered the optional "what would you do differently next time" question; learner moved straight to the app map without answering — treated as declined, not pursued further.
+Activity mode: Guided route, completed live in conversation (not a static/offline walkthrough).
 
 ## Revisions
 
