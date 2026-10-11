@@ -38,7 +38,7 @@ Open the app, pick an account, choose expense or inflow, enter an amount and a s
 - Exporting everything to a real Excel workbook, one sheet per account, with running balances and properly formatted dates.
 - Importing historical transactions and a starting balance from a spreadsheet template when adding a new account, instead of typing years of history by hand.
 - A first-run welcome screen that asks a brand-new user's name once, instead of leaving it blank forever.
-- A handful of small rules that stop mismatched data before it happens — a domiciliary account can't be set to Naira, for instance, and a starting balance locks once an account has real transactions, since changing it afterward would throw off every balance calculated since.
+- A handful of small rules that stop mismatched data before it happens — a domiciliary account can't be set to Naira, choosing Dollar or Pound sets the account type to domiciliary automatically, and both starting balance and currency lock once an account has real transactions, since changing either afterward would throw off or reinterpret every balance calculated since.
 
 ## Deliberately left for later
 

@@ -22,8 +22,9 @@ Source: `scope.md > The Core Loop`, `scope.md > What "Working" Looks Like`.
 
 - **Account Setup** — reached automatically on first open (zero accounts), and reachable any time afterward via "Add Account" on the Dashboard. One account per pass: Bank Name, Account Type, Currency, Personal/Business, Starting Balance, then "add another account?"
 - **Dashboard** — the home screen on every visit after setup. Overall Naira/Dollar totals at top, then a Personal section (its own ₦/$ subtotals + its accounts) and a Business section (its own ₦/$ subtotals + its accounts). "Add Transaction" and "Add Account" buttons.
-- **Account Detail** — reached by tapping an account row. Current balance at top, full transaction history below (newest first).
+- **Account Detail** — reached by tapping an account row. Current balance at top, full transaction history below (newest first), with search and an expense/inflow filter, and multi-select delete.
 - **Add/Edit Transaction** — reached via "Add Transaction" (pick account first) or by tapping an existing transaction (pre-filled, with Delete also available). Fields: expense/inflow, date, description, amount.
+- **Account Settings** — added during `5-build` final review, reachable from the Dashboard. Edit the signed-in user's Name, Surname, Email, and Password.
 
 ## Look and Feel
 
@@ -36,7 +37,8 @@ Minimal and clean, but colorful and playful — not sterile, not a bare spreadsh
 ## Features and Behavior
 
 ### User Profile
-- Name, Surname, and Email identify whoever is using the tracker. For this PoC there's exactly one user, so the profile is set up directly rather than through an in-app registration form.
+- Name, Surname, and Email identify whoever is using the tracker. For this PoC there's exactly one user — the Auth account itself is still created directly in Supabase, not through a public registration form — but Name and Surname are collected in-app on first run (the welcome screen, before the first account is added), since the Supabase dashboard's own "Add user" flow has nowhere to enter them. Added during `5-build` final review once this gap became concrete: without it, a real new user's profile stayed permanently blank.
+- Email, Name, and Surname are also editable afterward from Account Settings (added during `5-build` final review), alongside changing the password.
 - Kept as its own piece of data, separate from bank accounts, so a future version could let more than one person set up their own profile without changing how bank accounts or transactions work.
 
 ### Account Setup
@@ -46,6 +48,8 @@ Minimal and clean, but colorful and playful — not sterile, not a bare spreadsh
 - **Account details can be edited after creation** — Bank Name, Account Number, Account Type, Currency, Personal/Business, and Starting Balance are all editable later, not just at setup.
 - Account Number was added during `5-build` final review: with same-bank, same-type accounts in play (e.g. two savings accounts at the same bank), bank name and type alone weren't always enough to tell accounts apart at a glance.
 - Pound was added as a third currency during `5-build` final review, for completeness alongside Naira and Dollar. Elsewhere in this document, "Naira and Dollar" describes the originally-approved two-currency scope and is left as written rather than rewritten throughout — Dashboard totals, section subtotals, and Account Setup all support all three currencies in the built app.
+- **Starting Balance and Currency each lock (disabled, with an explanatory hint) once the account has any transactions** — changing either afterward would silently throw off or reinterpret every balance already calculated from it. Currency's lock was added during `5-build` final review, flagged by a repository audit as a gap: Starting Balance already locked this way, but Currency didn't, so it could still be changed out from under existing transactions.
+- **Importing history from a spreadsheet** — added during `5-build` final review (`scope.md > Explicitly Cut`). On Add Account, instead of entering a Starting Balance by hand, you can download a fixed template, fill in past transactions and an opening balance, and upload it; the app parses it, shows a preview (found transactions, any skipped rows and why), and uses it to seed the new account. Reading an existing workbook exactly as-is (arbitrary columns/formatting) is still cut — this only reads the app's own template.
 
 ### Dashboard
 - Overall totals: Total Naira and Total Dollar, summed across every account regardless of personal/business.
@@ -59,6 +63,8 @@ Minimal and clean, but colorful and playful — not sterile, not a bare spreadsh
 - Current balance at the top.
 - Full transaction history below, newest transaction first. Once a history passes 10 entries, it's paginated — 10 per page, numbered page buttons plus prev/next, and swipe left/right between pages — added during `5-build` final review so a long history doesn't mean endless scrolling.
 - Tapping a transaction opens Edit/Delete for it.
+- **Search and filter**, added during `5-build` final review: a search box matches against description and amount, and a type filter narrows to expenses-only or inflows-only; both apply on top of each other and the pagination above.
+- **Multi-select delete with undo**, added during `5-build` final review: a "Select" mode lets you tick several transactions and delete them together, with a short undo window afterward before the delete is final — covers the realistic case of cleaning up a batch of mis-entered rows, not just one at a time.
 
 ### Add / Edit / Delete Transaction
 - Add: pick the account (pre-selected if you tapped in from that account's page; shown with its account type to tell similarly-named accounts apart), choose expense or inflow, set the date (defaults to today, editable), enter a description, enter an amount, submit.
@@ -89,19 +95,20 @@ Minimal and clean, but colorful and playful — not sterile, not a bare spreadsh
 - Edit/delete reached by tapping the transaction (not a swipe gesture) — more discoverable and reliable to build for a phone-first PoC, and the learner named UX/intuitiveness as critical.
 
 ## What We're Building
-- A user profile (Name, Surname, Email) identifying the person using the tracker — one profile for now, set up directly rather than through an in-app form.
+- A user profile (Name, Surname, Email) identifying the person using the tracker — one profile for now; the Auth account is still created directly in Supabase, but Name/Surname are collected in-app on first run, and all three are editable afterward from Account Settings.
 - Account setup: looped one-at-a-time add-account flow with Bank Name, Account Type, Currency, Personal/Business, Starting Balance.
 - "Add Account" available any time from the Dashboard, not just on first run.
-- **Editing an existing account's details** (Bank Name, Account Type, Currency, Personal/Business, Starting Balance), not just transactions.
+- **Editing an existing account's details** (Bank Name, Account Type, Currency, Personal/Business, Starting Balance), not just transactions — with Starting Balance and Currency each locking once the account has real transactions.
+- **Importing history from a spreadsheet template** when adding a new account, instead of starting from a bare manually-entered balance.
 - Dashboard with overall + Personal + Business currency totals, grouped account lists, "Add Transaction" and "Add Account" buttons.
-- Account Detail page: balance + full transaction history, newest first.
+- Account Detail page: balance + full transaction history, newest first, with search, a type filter, and multi-select delete with undo.
 - Add, edit, and delete a transaction, with the account balance always recalculating to match.
-- **Export everything tracked to an Excel workbook (.xlsx), one sheet per account, available at any time.**
+- **Export everything tracked to an Excel workbook (.xlsx), one sheet per account (named by bank name + account type), with a running balance column, available at any time.**
 - Missing-amount validation and an empty-history state.
-- Playful, colorful visual direction per the supplied palette, with non-default typography and icons.
+- Playful, colorful visual direction per the supplied palette, with non-default typography and icons — revised during `5-build` final review toward a more minimal, classy treatment (see `spec.md > Look and Feel`).
 
 ## Deferred From the POC
-- **Import historical data** from the existing Excel workbook (`scope.md > Later`) — deferred; new accounts start from a manually entered starting balance instead.
+- **Reading an existing workbook exactly as-is** (your real account sheets, unedited) — still deferred; their columns and date formatting aren't something the app controls. A fixed-template import was built instead during `5-build` final review (see `Account Setup` above) — new accounts no longer need a manually entered starting balance with no history behind it.
 - **Investments** — treasury bills, fixed deposits, stocks (`scope.md > Later`) — out of scope for this PoC entirely.
 - **Backup/alternate access beyond phone** (`scope.md > Later`) — may fall out naturally depending on platform, not a requirement now.
 - **Self-service profile setup** — an in-app registration screen so someone other than the learner could create their own profile and log in. The underlying data is already shaped to support multiple users later (see `spec.md > Decisions`); only the sign-up screen itself is deferred.
@@ -112,7 +119,7 @@ Minimal and clean, but colorful and playful — not sterile, not a bare spreadsh
 ## Non-Goals
 - No currency conversion or cross-currency combined totals — Naira and Dollar always stay separate.
 - No multi-user accounts or sharing in this PoC.
-- No historical data import in this PoC — every account starts from a manually entered starting balance.
+- No free-form import of an existing workbook as-is — only the app's own fixed template can be imported (see `Deferred From the POC`).
 
 ## Open Questions
 - ~~Whether an account's own details can be edited after creation~~ — resolved during `4-spec`: yes, editable.

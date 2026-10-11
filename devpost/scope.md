@@ -37,7 +37,7 @@ You open the app and see a dashboard: total balance in Naira at the top, total i
 - Automated monthly export emailed as a backup, on the last day of each month — raised during `5-build` final review, deferred because it needs real backend infrastructure this static-site-plus-Supabase architecture doesn't have today (a scheduled server-side function, e.g. Supabase Edge Function + `pg_cron`, plus a separate email-sending service like Resend, since Supabase's built-in email only covers auth messages, not arbitrary attachments)
 - A consolidated navigation menu — Sign Out, Export to Excel, and Edit Account currently live as separate direct controls rather than one menu; raised during `5-build` final review, deferred rather than built then
 - Archive an account instead of deleting it — keeps its history, hides it from the dashboard; raised when discussing long-term history, deferred
-- Recently deleted list — deleted transactions kept for 30 days before permanent removal; raised with multi-select delete, deferred until undo is built
+- Recently deleted list — deleted transactions kept for 30 days before permanent removal; raised with multi-select delete. A short few-second undo window right after a multi-select delete was built instead (`5-build` final review); a longer-lived 30-day recovery list is still cut.
 - Reconcile against the bank — enter the balance shown in the banking app and see the difference; raised as a high-value check aligned with the app's purpose, deferred
 - Monthly summary — total in, total out, and net per account per month; raised when discussing long-term history, deferred
 - Categories or tags — structured labels (e.g. groceries) instead of free-text descriptions, enabling spending summaries; raised, deferred as a larger change

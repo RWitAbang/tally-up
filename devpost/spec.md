@@ -24,14 +24,16 @@ PRD ref: `prd.md > The Core Journey`.
 1. **You open the URL** on your phone. `index.html` first checks: is there a valid Supabase sign-in session for this browser? If not, you're sent to `sign-in.html`.
 2. **You sign in** with your one email/password account. Supabase hands back a session, which its client library stores in the browser automatically — that's what lets you stay signed in on that device afterward.
 3. **`index.html` checks Supabase:** any rows in `accounts` yet? If none, you're sent to `setup.html` (`prd.md > Account Setup`).
-4. **You fill in one account's details and save** → an `insert` into the `accounts` table. "Add another?" loops you back through the same form until you decline, then you land on `dashboard.html`.
-5. **Every later visit**, once signed in and with accounts already created, `index.html` sends you straight to `dashboard.html` — no setup repeated (`prd.md > Every later visit`).
-6. **Dashboard loads** (`prd.md > Dashboard`) → it asks Supabase for every account and every transaction, adds them up in the browser (grouped first by currency, then by Personal/Business), and renders the totals plus each account row.
-7. **You tap "Add Transaction"** → `transaction.html`, pick the account, choose expense/inflow, confirm or edit the date, add a description and amount, submit → an `insert` into `transactions`. You're sent back to the Dashboard, which re-fetches and shows the updated totals immediately (`prd.md > Logging a transaction`).
-8. **You tap an account row** → `account.html?id=...` (`prd.md > Viewing an account`) → fetches that one account and its transactions, computes its current balance fresh (starting balance + its transactions added up — not a stored number that gets nudged on every change), and shows the history newest-first.
-9. **You tap a transaction** in that history → `transaction.html`, pre-filled, with Edit and Delete available (`prd.md > Fixing a mistake`). Save → `update`; Delete → `delete`. Either way, the next balance calculation just reflects whatever rows remain — there's no separate balance number that could drift out of sync.
-10. **You tap "Edit" on an account** (from `account.html`) → `setup.html?account=...`, the same form as Account Setup but pre-filled and in single-edit mode (no "add another?" loop) → `update` on that row in `accounts` (`prd.md > Account Setup > Account details can be edited`).
-11. **You tap "Export to Excel"** on the Dashboard, any time → fetches every account and transaction, builds a workbook in the browser (one sheet per account) using SheetJS, and triggers a file download — no server involved (`prd.md > Export to Excel`).
+4. **On that very first run**, before the account form, you're also asked for your First Name and Surname once — saved to `profiles` on the same submit that creates your first account (added during `5-build` final review; see **Components > Account Setup**).
+5. **You fill in one account's details — optionally importing history from a spreadsheet template instead of a bare starting balance — and save** → an `insert` into the `accounts` table. "Add another?" loops you back through the same form until you decline, then you land on `dashboard.html`.
+6. **Every later visit**, once signed in and with accounts already created, `index.html` sends you straight to `dashboard.html` — no setup repeated (`prd.md > Every later visit`).
+7. **Dashboard loads** (`prd.md > Dashboard`) → it asks Supabase for every account and every transaction, adds them up in the browser (grouped first by currency, then by Personal/Business), and renders the totals plus each account row.
+8. **You tap "Add Transaction"** → `transaction.html`, pick the account, choose expense/inflow, confirm or edit the date, add a description and amount, submit → an `insert` into `transactions`. You're sent back to that account's page (not the Dashboard, fixed during `5-build` final review), which shows the updated balance immediately (`prd.md > Logging a transaction`).
+9. **You tap an account row** → `account.html?id=...` (`prd.md > Viewing an account`) → fetches that one account and its transactions, computes its current balance fresh (starting balance + its transactions added up — not a stored number that gets nudged on every change), and shows the history newest-first, with search, a type filter, and multi-select delete with undo available (all added during `5-build` final review).
+10. **You tap a transaction** in that history → `transaction.html`, pre-filled, with Edit and Delete available (`prd.md > Fixing a mistake`). Save → `update`; Delete → `delete`. Either way, the next balance calculation just reflects whatever rows remain — there's no separate balance number that could drift out of sync.
+11. **You tap "Edit" on an account** (from `account.html`) → `setup.html?account=...`, the same form as Account Setup but pre-filled and in single-edit mode (no "add another?" loop) → `update` on that row in `accounts`, with Starting Balance and Currency locked once the account has transactions (`prd.md > Account Setup > Account details can be edited`).
+12. **You tap "Export to Excel"** on the Dashboard, any time → fetches every account and transaction, builds a workbook in the browser (one sheet per account, named by bank name + account type, each with a running balance column) using SheetJS, and triggers a file download — no server involved (`prd.md > Export to Excel`).
+13. **You open Account Settings** from the Dashboard, any time → edit Name, Surname, Email, or Password (added during `5-build` final review; `prd.md > Account Settings`).
 
 ## Stack
 
@@ -69,20 +71,24 @@ PRD ref: `prd.md > The Core Journey`.
 
 ### Account Setup (also handles Account Edit)
 `setup.html` / `js/setup.js` — PRD ref: `prd.md > Account Setup`. Two modes, same form, same file — mirroring how `transaction.html` already handles both add and edit:
-- **No `?account=` param** (first run, or "Add Account" from the Dashboard): one-account-at-a-time form, `insert`s into `accounts`, loops on "add another?" until declined.
-- **`?account=<id>`** (tapped "Edit" from Account Detail): pre-fills the form with that account's current details, shows "Save" instead of "add another?", and `update`s the row instead of inserting a new one.
+- **No `?account=` param** (first run, or "Add Account" from the Dashboard): one-account-at-a-time form, `insert`s into `accounts`, loops on "add another?" until declined. On the true first run only (`accounts.length === 0`), also collects First Name/Surname and saves them to `profiles` on the same submit — added during `5-build` final review.
+- **`?account=<id>`** (tapped "Edit" from Account Detail): pre-fills the form with that account's current details, shows "Save" instead of "add another?", and `update`s the row instead of inserting a new one. If the account already has transactions, Starting Balance and Currency are disabled with an explanatory hint, and the update payload omits them entirely rather than just disabling the input — added during `5-build` final review (Currency's lock closed a gap found by audit: Starting Balance already locked this way).
+- **Import History** (added during `5-build` final review): on the add-account path, before Starting Balance, an optional step lets you download a fixed `.xlsx` template, fill in past transactions plus an opening balance, and upload it (`js/import-transactions.js`, via SheetJS). A successful parse shows a preview (count of transactions found, any skipped rows and why) and seeds the new account's starting balance and transaction rows from it instead of a manually typed balance.
 
 ### Dashboard
-`dashboard.html` / `js/dashboard.js` — PRD ref: `prd.md > Dashboard`. Fetches all accounts and all transactions, computes overall + Personal + Business subtotals per currency in JavaScript, renders account rows, and provides "Add Transaction" / "Add Account" buttons.
+`dashboard.html` / `js/dashboard.js` — PRD ref: `prd.md > Dashboard`. Fetches all accounts and all transactions, computes overall + Personal + Business subtotals per currency in JavaScript, renders account rows, and provides "Add Transaction" / "Add Account" buttons, plus links to Export and Account Settings.
 
 ### Account Detail
-`account.html` / `js/account.js` — PRD ref: `prd.md > Account Detail`. Reads `?id=` from the URL, fetches that account and its transactions, computes current balance (starting balance + its transactions), renders history newest-first, links each row into the transaction editor.
+`account.html` / `js/account.js` — PRD ref: `prd.md > Account Detail`. Reads `?id=` from the URL, fetches that account and its transactions, computes current balance (starting balance + its transactions), renders history newest-first (paginated 10/page once it's that long), links each row into the transaction editor. Added during `5-build` final review: a search box and an expense/inflow type filter (combine with each other and with pagination), and a "Select" mode for multi-select delete with a short undo window before the delete is committed.
 
 ### Add / Edit / Delete Transaction
-`transaction.html` / `js/transaction.js` — PRD ref: `prd.md > Add / Edit / Delete Transaction`. Reads `?account=` (and `?transaction=` if editing) from the URL. Validates amount is present and non-zero before allowing submit. `insert`s, `update`s, or `delete`s a row in `transactions` accordingly, then returns to where the user came from.
+`transaction.html` / `js/transaction.js` — PRD ref: `prd.md > Add / Edit / Delete Transaction`. Reads `?account=` (and `?transaction=` if editing) from the URL. Validates amount is present and non-zero before allowing submit. `insert`s, `update`s, or `delete`s a row in `transactions` accordingly, then redirects to that account's page (added during `5-build` final review — previously went back to the Dashboard regardless of where you started).
+
+### Account Settings
+`account-settings.html` / `js/account-settings.js` — added during `5-build` final review. Name and Surname `update` directly into `profiles`; Email changes go through `supabase.auth.updateUser({ email })` instead (requires confirming via a link sent to the new address — `profiles.email` catches up afterward via `js/auth-guard.js`'s sync on next load, not written here directly); Password changes go through `supabase.auth.updateUser({ password })`, with a show/hide toggle and a confirmation field checked before submit.
 
 ### Export to Excel
-`js/export.js`, triggered by a button on `dashboard.html` — PRD ref: `prd.md > Export to Excel`. Fetches every account and its transactions, builds one worksheet per account (Date, Type, Description, Amount columns) with SheetJS, names each sheet after the account (sanitized — Excel sheet names can't contain `\ / ? * [ ]` and are capped at 31 characters), and calls `XLSX.writeFile()` to trigger a browser download. Runs entirely client-side; no data leaves the browser except into the downloaded file.
+`js/export.js`, triggered by a button on `dashboard.html` — PRD ref: `prd.md > Export to Excel`. Fetches every account and its transactions, builds one worksheet per account (Date, Type, Description, Amount, and a running Balance column — the Balance column added during `5-build` final review) with SheetJS, names each sheet after the bank name + account type (e.g. "GT Current" — changed from bank name alone during `5-build` final review, sanitized and capped at 31 characters since Excel sheet names can't contain `\ / ? * [ ]`, falling back to a numeric suffix only if two accounts still collide), and calls `XLSX.writeFile()` to trigger a browser download. Runs entirely client-side; no data leaves the browser except into the downloaded file.
 
 ## Data Model
 
@@ -96,7 +102,7 @@ Three tables in Supabase. Every table carries a `user_id` (for `profiles`, the r
 | surname | text | |
 | email | text | mirrors the Auth account's email for convenience |
 
-For this PoC, with exactly one user, this single row is inserted directly (via the Supabase dashboard) rather than through an in-app form — there's no registration screen in this build (see **Decisions**).
+For this PoC, with exactly one user, the Auth account itself (`id`, `email`) is still created directly via the Supabase dashboard — there's no registration screen in this build (see **Decisions**). `name` and `surname` are collected in-app instead, on the first-run welcome screen (`js/setup.js`, added during `5-build` final review), since the dashboard's own "Add user" flow has nowhere to enter them. All three fields are editable afterward from `account-settings.html`; `js/auth-guard.js` keeps `email` synced from Auth on every page load in case it was changed there directly.
 
 **`accounts`**
 | column | type | notes |
@@ -106,9 +112,9 @@ For this PoC, with exactly one user, this single row is inserted directly (via t
 | bank_name | text | editable after creation |
 | account_number | text, nullable | optional, editable — added during `5-build` final review to disambiguate accounts that share a bank name and type |
 | account_type | text | `savings` \| `current` \| `domiciliary` \| `utility_card` \| `domiciliary_card` — editable. The last two added during `5-build` final review. |
-| currency | text | `NGN` \| `USD` \| `GBP` — editable. `GBP` added during `5-build` final review. |
+| currency | text | `NGN` \| `USD` \| `GBP` — editable. `GBP` added during `5-build` final review. Locked (not editable) once the account has any transactions — closed during `5-build` final review as a gap: `starting_balance` already locked this way, `currency` didn't. |
 | category | text | `personal` \| `business` — editable |
-| starting_balance | numeric | default `0`, editable |
+| starting_balance | numeric | default `0`, editable. Locked once the account has any transactions. |
 | created_at | timestamptz | default `now()` |
 
 **`transactions`**
@@ -128,7 +134,7 @@ For this PoC, with exactly one user, this single row is inserted directly (via t
 - **An account's current balance is never stored as its own number.** It's computed every time as `starting_balance + sum(inflow amounts) − sum(expense amounts)` from that account's rows in `transactions`. This is a deliberate simplification (see **What Was Simplified and Why**): editing or deleting a transaction can't leave a stale balance behind, because there's no separate balance value to forget to update. Editing `starting_balance` directly shifts this computed balance the same way — nothing else needs to change.
 - Dashboard totals are the same computation run across every account, then grouped by currency and by Personal/Business in JavaScript after fetching.
 - The only thing that persists in the browser itself (not Supabase) is the Auth session token, which the Supabase client library stores automatically — that's what keeps you signed in on a device between visits.
-- **Caveat worth knowing:** editing an account's `currency` after it already has transactions doesn't convert the existing amounts — they stay the same numbers, now labeled with the new currency. Fine for a single-user PoC where this would be a deliberate, rare correction, not something to guard against with extra logic.
+- **Superseded caveat, resolved during `5-build` final review:** this used to note that editing `currency` after an account had transactions would reinterpret existing amounts without converting them. That gap is now closed — `currency` locks (disabled, with an explanatory hint) the same way `starting_balance` already did, once the account has any transactions, and the update payload omits the field entirely rather than relying on the disabled input.
 
 ## File Structure
 
@@ -148,9 +154,10 @@ tally-up/
 │   ├── supabase-client.js  # Supabase URL + key, shared client
 │   ├── auth-guard.js       # redirects to sign-in.html if no session; syncs profiles.email from Auth
 │   ├── sign-in.js
-│   ├── setup.js             # account add AND edit (reads ?account= to switch mode)
+│   ├── setup.js             # account add AND edit (reads ?account= to switch mode); first-run name collection; starting_balance/currency locking
+│   ├── import-transactions.js # parses the uploaded .xlsx template for Account Setup's import step
 │   ├── dashboard.js
-│   ├── account.js           # includes transaction-history pagination (10/page)
+│   ├── account.js           # pagination (10/page), search, type filter, multi-select delete with undo
 │   ├── transaction.js
 │   ├── account-settings.js
 │   ├── account-types.js     # shared account_type → display label map
@@ -180,7 +187,8 @@ tally-up/
 - **Submitting a transaction with no amount or 0** → inline error "please enter an amount," submission blocked (`prd.md > Missing or zero amount`).
 - **A freshly created account with no transactions yet** → Account Detail shows "no transactions yet" instead of a blank space (`prd.md > Empty transaction history`).
 - **Wrong email/password at sign-in** → plain inline error message; no lockout logic needed for a single-user PoC.
-- **Supabase request is slow or fails** (weak phone connection) → show a simple "loading..." state while waiting, and a plain "couldn't load — try again" message on failure, rather than a blank or broken-looking screen.
+- **Supabase request is slow or fails** (weak phone connection) → show a loading spinner while waiting (page content stays hidden until data arrives, added during `5-build` final review in place of plain "loading..." text), and a plain "couldn't load — try again" message on failure, rather than a blank or broken-looking screen.
+- **A spreadsheet uploaded to Account Setup's import step is malformed or empty** (`js/import-transactions.js`) → rows missing a real date or a usable amount are skipped and listed with a reason in the preview rather than silently dropped or crashing the import; a file with no starting-balance row is rejected with an inline error before anything is imported.
 - **"Export to Excel" tapped with zero accounts** → a plain inline message ("add an account first") instead of generating an empty or broken file.
 
 ## What Was Simplified and Why
