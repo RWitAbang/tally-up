@@ -16,6 +16,14 @@
     <div id="status"></div>
     <div id="form-section">
       <form id="setup-form">
+        <div id="name-fields" hidden>
+          <label for="name">Your First Name</label>
+          <input type="text" id="name" name="name" required />
+
+          <label for="surname">Your Surname</label>
+          <input type="text" id="surname" name="surname" required />
+        </div>
+
         <div id="import-question">
           <label>Do you have existing transactions to import from a spreadsheet?</label>
           <div class="import-actions">
@@ -64,6 +72,7 @@
             <option value="USD">Dollar ($)</option>
             <option value="GBP">Pound (£)</option>
           </select>
+          <p class="hint" id="currency-locked-hint" hidden>Locked because this account already has transactions — changing currency now would reinterpret every past amount in a different currency.</p>
 
           <label for="category">Personal or Business</label>
           <select id="category" name="category">

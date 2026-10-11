@@ -150,15 +150,18 @@ h1 {
 
 .account-row {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
+  gap: 4px 12px;
 }
 
 .account-row-main {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
+  flex: 1 1 140px;
 }
 
 .account-row-name {
@@ -178,7 +181,11 @@ h1 {
 
 .account-row-balance {
   font-weight: 700;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
+  text-align: right;
+  flex: 0 1 auto;
+  max-width: 100%;
 }
 
 .account-row-balance.positive {
@@ -684,7 +691,8 @@ button.secondary {
   margin: 6px 0 0;
 }
 
-input:disabled {
+input:disabled,
+select:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }

@@ -26,6 +26,7 @@ if (session) {
   const accountNumberInput = document.getElementById('account_number');
   const addTransactionNowButton = document.getElementById('add-transaction-now');
   const balanceLockedHint = document.getElementById('balance-locked-hint');
+  const currencyLockedHint = document.getElementById('currency-locked-hint');
   const currencySelect = document.getElementById('currency');
   const accountTypeSelect = document.getElementById('account_type');
   const ngnOption = currencySelect.querySelector('option[value="NGN"]');
@@ -47,9 +48,11 @@ if (session) {
   const manualBalanceFieldEl = document.getElementById('manual-balance-field');
   const importBalanceReadoutEl = document.getElementById('import-balance-readout');
   const importHeaderEl = document.getElementById('import-header');
+  const nameFieldsEl = document.getElementById('name-fields');
 
   let newAccountId = null;
   let balanceLocked = false;
+  let currencyLocked = false;
   let pendingImport = null;
 
   function resetImportState() {
@@ -159,15 +162,23 @@ if (session) {
     accountNumberInput.value = accountNumberInput.value.replace(/[^0-9]/g, '');
   });
 
-  currencySelect.addEventListener('change', () => {
-    balanceSymbolEl.textContent = currencySymbol(currencySelect.value);
-    if (pendingImport) updateImportBalanceReadout();
-  });
-  balanceSymbolEl.textContent = currencySymbol(currencySelect.value);
-
   function isDomiciliaryType(type) {
     return type === 'domiciliary' || type === 'domiciliary_card';
   }
+
+  currencySelect.addEventListener('change', () => {
+    balanceSymbolEl.textContent = currencySymbol(currencySelect.value);
+    if (pendingImport) updateImportBalanceReadout();
+
+    // Dollar and Pound accounts are domiciliary accounts by default here —
+    // only auto-set it if the type isn't already some flavor of domiciliary,
+    // so an explicit "Domiciliary Card" choice is never silently overwritten.
+    if (currencySelect.value !== 'NGN' && !isDomiciliaryType(accountTypeSelect.value)) {
+      accountTypeSelect.value = 'domiciliary';
+      ngnOption.disabled = true;
+    }
+  });
+  balanceSymbolEl.textContent = currencySymbol(currencySelect.value);
 
   // A domiciliary account is a foreign-currency account by definition, so
   // Naira is never a valid choice for one. Disabling rather than removing
@@ -226,6 +237,10 @@ if (session) {
         balanceLocked = true;
         balanceInput.disabled = true;
         balanceLockedHint.hidden = false;
+
+        currencyLocked = true;
+        currencySelect.disabled = true;
+        currencyLockedHint.hidden = false;
       }
 
       cancelButton.hidden = false;
@@ -265,6 +280,7 @@ if (session) {
     } else {
       pageTitle.textContent = 'Welcome to Tally Up';
       welcomeDescEl.hidden = false;
+      nameFieldsEl.hidden = false;
     }
   }
 
@@ -314,6 +330,14 @@ if (session) {
         return;
       }
 
+      const firstName = nameFieldsEl.hidden ? null : form.name.value.trim();
+      const surname = nameFieldsEl.hidden ? null : form.surname.value.trim();
+
+      if (!nameFieldsEl.hidden && (!firstName || !surname)) {
+        errorEl.textContent = 'please enter your first name and surname';
+        return;
+      }
+
       const originalButtonText = saveButton.textContent;
       saveButton.disabled = true;
       saveButton.textContent = 'Saving…';
@@ -321,6 +345,19 @@ if (session) {
       function reenableSave() {
         saveButton.disabled = false;
         saveButton.textContent = originalButtonText;
+      }
+
+      if (firstName) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ name: firstName, surname })
+          .eq('id', session.user.id);
+
+        if (profileError) {
+          errorEl.textContent = "couldn't save your name — try again";
+          reenableSave();
+          return;
+        }
       }
 
       const escapedBankName = bankName.replace(/[%_]/g, '\\$&');
@@ -354,9 +391,11 @@ if (session) {
           bank_name: bankName,
           account_number: accountNumber || null,
           account_type: accountType,
-          currency,
           category,
         };
+        if (!currencyLocked) {
+          updates.currency = currency;
+        }
         if (!balanceLocked) {
           updates.starting_balance = startingBalance;
         }
@@ -422,6 +461,7 @@ if (session) {
     document.getElementById('add-another').addEventListener('click', () => {
       pageTitle.textContent = 'Add an Account';
       welcomeDescEl.hidden = true;
+      nameFieldsEl.hidden = true;
       confirmSection.hidden = true;
       formSection.hidden = false;
       importQuestionEl.hidden = false;

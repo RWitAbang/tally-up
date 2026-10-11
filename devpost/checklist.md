@@ -112,6 +112,11 @@ Activity mode: [not yet started]
 
 ## Revisions
 
+- Fixed a real data-integrity gap flagged by a repository audit: Currency on Edit Account had no lock, unlike Starting Balance — so an account with real transactions could have its currency changed, silently reinterpreting every past amount in a different currency with no conversion or warning. Currency now locks (disabled select, explanatory hint) the same way Starting Balance already does, once the account has any transactions; the update payload omits `currency` entirely when locked, not just the input's disabled state. Verified directly against a real account with transactions.
+
+- Added First Name/Surname fields to the true first-run welcome screen (shown only when `accounts.length === 0`, right after the welcome message) — the earlier plan to source name from account creation never had anywhere to actually collect it, since Supabase's own "Add user" dashboard has no name field, leaving every real new user's profile permanently blank otherwise. Saved to `profiles` as part of the same Save Account submit, before the account insert; validated required, not asked again on "Add another account" once set.
+- Selecting Dollar or Pound as the currency now auto-sets Account Type to Domiciliary, mirroring the existing rule that disables Naira for domiciliary types — but only when the type isn't already some flavor of domiciliary, so an explicit Domiciliary Card choice is never silently overwritten back to plain Domiciliary. Verified all three directions directly in the browser.
+
 - Once a template imports successfully, the "Import History" label, hint, and the Download/Upload Template buttons disappear — leaving just "Uploaded: <filename>" and the found-transactions summary before the account fields. A failed or empty import still shows the buttons, so there's a way to try a different file. Verified directly in the browser.
 
 - The "Yes, import history" / "No, enter manually" question now disappears once it's resolved — after a successful import, or after choosing "No" — rather than staying on screen alongside the fields it already answered. "Add another account" brings it back for the next account, since that's a fresh choice each time. Verified directly in the browser.
