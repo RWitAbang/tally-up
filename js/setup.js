@@ -51,6 +51,22 @@ if (session) {
   const importBalanceReadoutEl = document.getElementById('import-balance-readout');
   const importHeaderEl = document.getElementById('import-header');
   const nameFieldsEl = document.getElementById('name-fields');
+  const nameInput = document.getElementById('name');
+  const surnameInput = document.getElementById('surname');
+
+  // required must track visibility, not just sit static in the HTML: a
+  // required field inside a hidden container can still block the browser's
+  // native form validation on submit (it tries to focus the invalid field
+  // and can't, since it isn't rendered — the submit silently never fires).
+  function setNameFieldsVisible(visible) {
+    nameFieldsEl.hidden = !visible;
+    nameInput.required = visible;
+    surnameInput.required = visible;
+  }
+  // Safe baseline: every path except the true first-run welcome screen
+  // leaves these fields hidden without ever touching them, so `required`
+  // must default to false here rather than relying on the HTML attribute.
+  setNameFieldsVisible(false);
 
   let newAccountId = null;
   let balanceLocked = false;
@@ -296,7 +312,7 @@ if (session) {
         .single();
 
       if (!profile?.name || !profile?.surname) {
-        nameFieldsEl.hidden = false;
+        setNameFieldsVisible(true);
       }
     }
   }
@@ -478,7 +494,7 @@ if (session) {
     document.getElementById('add-another').addEventListener('click', () => {
       pageTitle.textContent = 'Add an Account';
       welcomeDescEl.hidden = true;
-      nameFieldsEl.hidden = true;
+      setNameFieldsVisible(false);
       confirmSection.hidden = true;
       formSection.hidden = false;
       importQuestionEl.hidden = false;
