@@ -288,7 +288,16 @@ if (session) {
     } else {
       pageTitle.textContent = 'Welcome to Tally Up';
       welcomeDescEl.hidden = false;
-      nameFieldsEl.hidden = false;
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('name, surname')
+        .eq('id', session.user.id)
+        .single();
+
+      if (!profile?.name || !profile?.surname) {
+        nameFieldsEl.hidden = false;
+      }
     }
   }
 

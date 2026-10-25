@@ -37,7 +37,7 @@ Minimal and clean, but colorful and playful — not sterile, not a bare spreadsh
 ## Features and Behavior
 
 ### User Profile
-- Name, Surname, and Email identify whoever is using the tracker. For this PoC there's exactly one user — the Auth account itself is still created directly in Supabase, not through a public registration form — but Name and Surname are collected in-app on first run (the welcome screen, before the first account is added), since the Supabase dashboard's own "Add user" flow has nowhere to enter them. Added during `5-build` final review once this gap became concrete: without it, a real new user's profile stayed permanently blank.
+- Name, Surname, and Email identify whoever is using the tracker. For this PoC there's exactly one user — the Auth account itself is still created directly in Supabase, not through a public registration form — but Name and Surname are collected in-app on first run (the welcome screen, before the first account is added), since the Supabase dashboard's own "Add user" flow has nowhere to enter them. Added during `5-build` final review once this gap became concrete: without it, a real new user's profile stayed permanently blank. If Name/Surname are already set on the `profiles` row by the time someone first signs in (e.g. filled in directly via the Supabase dashboard), the first-run screen skips asking for them — it only asks for whatever's still missing.
 - Email, Name, and Surname are also editable afterward from Account Settings (added during `5-build` final review), alongside changing the password.
 - Kept as its own piece of data, separate from bank accounts, so a future version could let more than one person set up their own profile without changing how bank accounts or transactions work.
 
