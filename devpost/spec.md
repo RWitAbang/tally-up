@@ -67,7 +67,7 @@ PRD ref: `prd.md > The Core Journey`.
 `js/supabase-client.js` creates the shared Supabase client (project URL + anon key) used by every page. `js/auth-guard.js` checks for a valid session on every protected page load and redirects to `sign-in.html` if there isn't one. Underpins every other component below.
 
 ### Sign In
-`sign-in.html` / `js/sign-in.js` — email + password form, calls `supabase.auth.signInWithPassword()`. On success, redirects to `index.html`. On failure, shows a plain inline error ("incorrect email or password"). No registration form exists in the app.
+`sign-in.html` / `js/sign-in.js` — email + password form, calls `supabase.auth.signInWithPassword()`. On success, redirects to `index.html`. On failure, shows a plain inline error ("incorrect email or password"). No registration form exists in the app. A one-line description of what the app does sits under the heading — added after Devpost judge feedback on other submissions, since this is the actual first screen any signed-out visitor (a reviewer included) lands on, and there's no separate marketing page.
 
 ### Account Setup (also handles Account Edit)
 `setup.html` / `js/setup.js` — PRD ref: `prd.md > Account Setup`. Two modes, same form, same file — mirroring how `transaction.html` already handles both add and edit:
@@ -111,8 +111,8 @@ For this PoC, with exactly one user, the Auth account itself (`id`, `email`) is 
 | user_id | uuid, foreign key → `profiles.id` | set to the signed-in user's id on insert |
 | bank_name | text | editable after creation |
 | account_number | text, nullable | optional, editable — added during `5-build` final review to disambiguate accounts that share a bank name and type |
-| account_type | text | `savings` \| `current` \| `domiciliary` \| `utility_card` \| `domiciliary_card` — editable. The last two added during `5-build` final review. |
-| currency | text | `NGN` \| `USD` \| `GBP` — editable. `GBP` added during `5-build` final review. Locked (not editable) once the account has any transactions — closed during `5-build` final review as a gap: `starting_balance` already locked this way, `currency` didn't. |
+| account_type | text | `savings` \| `current` \| `domiciliary` \| `utility_card` \| `domiciliary_card` — editable. The last two added during `5-build` final review. Constrains `currency`: `savings`/`current`/`utility_card` only pair with `NGN`; `domiciliary`/`domiciliary_card` only pair with `USD`/`GBP` (enforced client-side in `js/setup.js`, not a database constraint). |
+| currency | text | `NGN` \| `USD` \| `GBP` — editable, within whatever `account_type` above allows. `GBP` added during `5-build` final review. Locked (not editable at all) once the account has any transactions — closed during `5-build` final review as a gap: `starting_balance` already locked this way, `currency` didn't. |
 | category | text | `personal` \| `business` — editable |
 | starting_balance | numeric | default `0`, editable. Locked once the account has any transactions. |
 | created_at | timestamptz | default `now()` |

@@ -30,6 +30,8 @@ if (session) {
   const currencySelect = document.getElementById('currency');
   const accountTypeSelect = document.getElementById('account_type');
   const ngnOption = currencySelect.querySelector('option[value="NGN"]');
+  const usdOption = currencySelect.querySelector('option[value="USD"]');
+  const gbpOption = currencySelect.querySelector('option[value="GBP"]');
   const balanceSymbolEl = document.getElementById('balance-symbol');
   const importSection = document.getElementById('import-section');
   const downloadTemplateButton = document.getElementById('download-template');
@@ -166,31 +168,37 @@ if (session) {
     return type === 'domiciliary' || type === 'domiciliary_card';
   }
 
+  // Savings, Current, and Utility Card are Naira accounts; Domiciliary and
+  // Domiciliary Card are foreign-currency accounts (Dollar or Pound). The
+  // two groups never mix, so Account Type is what decides which currency
+  // options are selectable at all.
+  function allowedCurrenciesForType(type) {
+    return isDomiciliaryType(type) ? ['USD', 'GBP'] : ['NGN'];
+  }
+
+  // Disabling rather than removing an option means a pre-existing account
+  // saved before this rule existed (or before a type/currency pair was this
+  // strict) still displays its actual saved currency correctly when edited.
+  function restrictCurrencyOptions(type) {
+    const allowed = allowedCurrenciesForType(type);
+    ngnOption.disabled = !allowed.includes('NGN');
+    usdOption.disabled = !allowed.includes('USD');
+    gbpOption.disabled = !allowed.includes('GBP');
+  }
+
   currencySelect.addEventListener('change', () => {
     balanceSymbolEl.textContent = currencySymbol(currencySelect.value);
     if (pendingImport) updateImportBalanceReadout();
-
-    // Dollar and Pound accounts are domiciliary accounts by default here —
-    // only auto-set it if the type isn't already some flavor of domiciliary,
-    // so an explicit "Domiciliary Card" choice is never silently overwritten.
-    if (currencySelect.value !== 'NGN' && !isDomiciliaryType(accountTypeSelect.value)) {
-      accountTypeSelect.value = 'domiciliary';
-      ngnOption.disabled = true;
-    }
   });
   balanceSymbolEl.textContent = currencySymbol(currencySelect.value);
 
-  // A domiciliary account is a foreign-currency account by definition, so
-  // Naira is never a valid choice for one. Disabling rather than removing
-  // the option means a pre-existing account saved with this combination
-  // (from before this rule existed) still displays correctly when edited.
-  ngnOption.disabled = isDomiciliaryType(accountTypeSelect.value);
+  restrictCurrencyOptions(accountTypeSelect.value);
 
   accountTypeSelect.addEventListener('change', () => {
-    const restrictNgn = isDomiciliaryType(accountTypeSelect.value);
-    ngnOption.disabled = restrictNgn;
-    if (restrictNgn && currencySelect.value === 'NGN') {
-      currencySelect.value = 'USD';
+    restrictCurrencyOptions(accountTypeSelect.value);
+    const allowed = allowedCurrenciesForType(accountTypeSelect.value);
+    if (!allowed.includes(currencySelect.value)) {
+      currencySelect.value = allowed[0];
       balanceSymbolEl.textContent = currencySymbol(currencySelect.value);
       if (pendingImport) updateImportBalanceReadout();
     }
@@ -222,7 +230,7 @@ if (session) {
       form.bank_name.value = account.bank_name;
       form.account_number.value = account.account_number ?? '';
       form.account_type.value = account.account_type;
-      ngnOption.disabled = isDomiciliaryType(account.account_type);
+      restrictCurrencyOptions(account.account_type);
       form.currency.value = account.currency;
       balanceSymbolEl.textContent = currencySymbol(account.currency);
       form.category.value = account.category;
