@@ -11,6 +11,11 @@ if (session) {
   const params = new URLSearchParams(window.location.search);
   const editingAccountId = params.get('account');
 
+  document.getElementById('sign-out').addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    window.location.href = 'sign-in.html';
+  });
+
   const statusEl = document.getElementById('status');
   const form = document.getElementById('setup-form');
   const formSection = document.getElementById('form-section');
