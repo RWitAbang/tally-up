@@ -1,0 +1,23 @@
+{
+  "name": "Tally Up",
+  "short_name": "Tally Up",
+  "description": "A simple, multi-currency expense tracker for your personal and business accounts.",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#fdfaf6",
+  "theme_color": "#B8336A",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
