@@ -1,5 +1,6 @@
 import { supabase } from './supabase-client.js';
 import { accountTypeLabel } from './account-types.js';
+import { loadXLSX } from './load-xlsx.js';
 
 function sanitizeSheetName(name, usedNames) {
   const base = (name || 'Account').replace(/[\\/?*[\]]/g, '').slice(0, 31) || 'Account';
@@ -32,6 +33,12 @@ function parseDateCell(dateString) {
 }
 
 export async function exportToExcel() {
+  try {
+    await loadXLSX();
+  } catch {
+    return { ok: false, reason: 'load-failed' };
+  }
+
   const { data: accounts, error: accountsError } = await supabase
     .from('accounts')
     .select('*')

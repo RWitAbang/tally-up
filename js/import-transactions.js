@@ -9,7 +9,10 @@
 // the library's cellDates option, which converts through a JS Date and gets
 // the calendar day wrong whenever the browser's local timezone isn't UTC —
 // confirmed by testing the round trip in several timezones before writing this.
-export function downloadImportTemplate() {
+import { loadXLSX } from './load-xlsx.js';
+
+export async function downloadImportTemplate() {
+  await loadXLSX();
   const rows = [
     ['Date', 'Description', 'Amount', 'Balance'],
     [new Date(), 'Starting Balance', 0, 0],
@@ -33,7 +36,8 @@ function readCellValue(cell) {
   return cell ? cell.v : null;
 }
 
-export function parseImportFile(file) {
+export async function parseImportFile(file) {
+  await loadXLSX();
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onerror = () => reject(new Error("couldn't read this file"));

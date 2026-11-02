@@ -116,7 +116,13 @@ if (session) {
   importChoiceYesButton.addEventListener('click', showImportChoice);
   importChoiceNoButton.addEventListener('click', showManualEntry);
 
-  downloadTemplateButton.addEventListener('click', () => downloadImportTemplate());
+  downloadTemplateButton.addEventListener('click', async () => {
+    try {
+      await downloadImportTemplate();
+    } catch (err) {
+      importErrorEl.textContent = err.message;
+    }
+  });
   uploadTemplateButton.addEventListener('click', () => importFileInput.click());
 
   importFileInput.addEventListener('change', async () => {
