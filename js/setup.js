@@ -27,6 +27,10 @@ if (session) {
   const welcomeDescEl = document.getElementById('welcome-desc');
   const saveButton = document.getElementById('save-button');
   const cancelButton = document.getElementById('cancel');
+  let cancelDestination = 'dashboard.html';
+  cancelButton.addEventListener('click', () => {
+    window.location.href = cancelDestination;
+  });
   const deleteButton = document.getElementById('delete-account');
   const accountNumberInput = document.getElementById('account_number');
   const addTransactionNowButton = document.getElementById('add-transaction-now');
@@ -273,9 +277,7 @@ if (session) {
       }
 
       cancelButton.hidden = false;
-      cancelButton.addEventListener('click', () => {
-        window.location.href = `account.html?id=${editingAccountId}`;
-      });
+      cancelDestination = `account.html?id=${editingAccountId}`;
 
       deleteButton.hidden = false;
       deleteButton.addEventListener('click', async () => {
@@ -303,9 +305,6 @@ if (session) {
     const { count } = await supabase.from('accounts').select('id', { count: 'exact', head: true });
     if (count > 0) {
       cancelButton.hidden = false;
-      cancelButton.addEventListener('click', () => {
-        window.location.href = 'dashboard.html';
-      });
     } else {
       pageTitle.textContent = 'Welcome to Tally Up';
       welcomeDescEl.hidden = false;
@@ -507,6 +506,8 @@ if (session) {
       importSection.hidden = true;
       resetImportState();
       balanceInput.value = '';
+      cancelDestination = 'dashboard.html';
+      cancelButton.hidden = false;
     });
 
     addTransactionNowButton.addEventListener('click', () => {
