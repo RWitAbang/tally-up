@@ -37,6 +37,10 @@ if (session) {
     window.location.href = 'setup.html';
   });
 
+  document.getElementById('import-accounts').addEventListener('click', () => {
+    window.location.href = 'import-accounts.html';
+  });
+
   document.getElementById('add-transaction').addEventListener('click', () => {
     window.location.href = 'transaction.html';
   });

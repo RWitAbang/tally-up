@@ -76,7 +76,10 @@ PRD ref: `prd.md > The Core Journey`.
 - **Import History** (added during `5-build` final review): on the add-account path, before Starting Balance, an optional step lets you download a fixed `.xlsx` template, fill in past transactions plus an opening balance, and upload it (`js/import-transactions.js`, via SheetJS). A successful parse shows a preview (count of transactions found, any skipped rows and why) and seeds the new account's starting balance and transaction rows from it instead of a manually typed balance.
 
 ### Dashboard
-`dashboard.html` / `js/dashboard.js` — PRD ref: `prd.md > Dashboard`. Fetches all accounts and all transactions, computes overall + Personal + Business subtotals per currency in JavaScript, renders account rows, and provides "Add Transaction" / "Add Account" buttons, plus links to Export and Account Settings.
+`dashboard.html` / `js/dashboard.js` — PRD ref: `prd.md > Dashboard`. Fetches all accounts and all transactions, computes overall + Personal + Business subtotals per currency in JavaScript, renders account rows, and provides "Add Transaction" / "Add Account" buttons, plus links to Export, Account Settings, and Import Multiple Accounts.
+
+### Import Multiple Accounts
+`import-accounts.html` / `js/import-accounts.js` — added post-submission. One workbook, one sheet per account, reusing the exact same per-sheet template as the single-account import (`downloadImportTemplate()`, `js/import-transactions.js`) — the sheet's own tab name becomes that account's Bank Name. `parseImportWorkbook()` (also in `js/import-transactions.js`, sharing its per-sheet parsing logic with the single-account `parseImportFile()` so the two can't drift apart) parses every sheet independently; a sheet that fails to parse (no starting balance row, for instance) is shown with its error and excluded, without blocking the other sheets. Since the template only carries transactions, not account details, a review screen lists one editable card per successfully-parsed sheet — Bank Name (pre-filled from the tab name), optional Account Number, Account Type, Currency, and Personal/Business — before anything is created. Account Type constrains Currency the same way it does in Account Setup (shared `js/account-currency-rules.js`, extracted during this feature so the rule can't drift between the two forms). Each included, validated account is inserted along with its transactions in one pass; the existing single-account Add Account flow is untouched.
 
 ### Account Detail
 `account.html` / `js/account.js` — PRD ref: `prd.md > Account Detail`. Reads `?id=` from the URL, fetches that account and its transactions, computes current balance (starting balance + its transactions), renders history newest-first (paginated 10/page once it's that long), links each row into the transaction editor. Added during `5-build` final review: a search box and an expense/inflow type filter (combine with each other and with pagination), and a "Select" mode for multi-select delete with a short undo window before the delete is committed.
@@ -147,7 +150,10 @@ tally-up/
 ├── account.html          # one account's balance + history (?id=)
 ├── transaction.html      # add/edit a transaction (?account=&transaction=)
 ├── account-settings.html # edit the signed-in user's name, surname, email, password
+├── import-accounts.html # one workbook, one sheet per account — added post-submission
 ├── 404.html              # Netlify's automatic fallback for any unmatched route
+├── manifest.json         # home-screen install: name, icons, standalone display
+├── icons/                # generated app icon at 512/192/180(apple)/32(favicon)
 ├── css/
 │   └── style.css         # palette, Fredoka/Nunito, layout
 ├── js/
@@ -155,7 +161,10 @@ tally-up/
 │   ├── auth-guard.js       # redirects to sign-in.html if no session; syncs profiles.email from Auth
 │   ├── sign-in.js
 │   ├── setup.js             # account add AND edit (reads ?account= to switch mode); first-run name collection; starting_balance/currency locking
-│   ├── import-transactions.js # parses the uploaded .xlsx template for Account Setup's import step
+│   ├── import-transactions.js # per-sheet template parsing, shared by single-account (parseImportFile) and multi-account (parseImportWorkbook) import
+│   ├── import-accounts.js   # multi-account workbook import: review cards, per-account type/currency/category, bulk insert
+│   ├── account-currency-rules.js # shared account_type ↔ currency constraint, used by Account Setup and the multi-account import
+│   ├── load-xlsx.js         # lazy-loads SheetJS (~950KB) only when Export/Import is actually used, not on every page load
 │   ├── dashboard.js
 │   ├── account.js           # pagination (10/page), search, type filter, multi-select delete with undo
 │   ├── transaction.js

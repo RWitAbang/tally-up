@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/favicon-32.png" sizes="32x32" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <meta name="theme-color" content="#B8336A" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Tally Up" />
+  <title>Import Multiple Accounts — Tally Up</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="card wide">
+    <div class="page-header">
+      <div class="header-title">
+        <h1>Import Multiple Accounts</h1>
+      </div>
+      <div class="header-actions">
+        <button id="cancel" class="sign-out-link">Back to Dashboard</button>
+      </div>
+    </div>
+
+    <div id="upload-section">
+      <p class="hint">Each sheet in the workbook becomes one account — the sheet's tab name is used as its Bank Name. Download the template, duplicate its one sheet in Excel/Sheets for each account, rename each tab, fill in a starting balance and transactions, then upload the whole workbook back here.</p>
+      <div class="import-actions">
+        <button type="button" id="download-template" class="secondary">Download Template</button>
+        <button type="button" id="upload-workbook" class="secondary">Upload Workbook</button>
+      </div>
+      <input type="file" id="workbook-file" accept=".xlsx" hidden />
+      <p class="hint" id="upload-filename" hidden></p>
+      <p class="error" id="upload-error"></p>
+    </div>
+
+    <div id="review-section" hidden>
+      <p class="hint">Found <span id="sheet-count"></span>. Fill in the details for each account you want to import — account number is optional, everything else is required.</p>
+      <div id="account-cards"></div>
+      <button type="button" id="confirm-import">Import Accounts</button>
+      <p class="error" id="import-error"></p>
+    </div>
+
+    <div id="confirm-section" hidden>
+      <p id="confirm-message"></p>
+      <button id="done">Done! — go to Dashboard</button>
+    </div>
+  </div>
+  <script type="module" src="js/import-accounts.js"></script>
+</body>
+</html>
